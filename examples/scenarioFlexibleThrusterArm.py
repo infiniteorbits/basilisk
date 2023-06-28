@@ -371,6 +371,12 @@ def run(show_plots, useDVThrusters):
     #
     scSim.InitializeSimulation()
 
+    # Add energy and momentum variables to log
+    scSim.AddVariableForLogging(scObject.ModelTag + ".totRotEnergy", simTimeStep, 0, 0, 'double')
+    scSim.AddVariableForLogging(scObject.ModelTag + ".totOrbEnergy", simTimeStep, 0, 0, 'double')
+    scSim.AddVariableForLogging(scObject.ModelTag + ".totOrbAngMomPntN_N", simTimeStep, 0, 2, 'double')
+    scSim.AddVariableForLogging(scObject.ModelTag + ".totRotAngMomPntC_N", simTimeStep, 0, 2, 'double')
+
     #
     #   configure a simulation stop time and execute the simulation run
     #
@@ -395,6 +401,13 @@ def run(show_plots, useDVThrusters):
     thrusterPosition = []
     for i in range(numTh):
         thrusterPosition.append(np.array(thrStateLog[i].thrusterLocation)) # r_FcS_S
+
+    # Extract the energy and momentum
+    orbEnergy = scSim.GetLogVariableData(scObject.ModelTag + ".totOrbEnergy")
+    orbAngMom_N = scSim.GetLogVariableData(scObject.ModelTag + ".totOrbAngMomPntN_N")
+    rotAngMom_N = scSim.GetLogVariableData(scObject.ModelTag + ".totRotAngMomPntC_N")
+    rotEnergy = scSim.GetLogVariableData(scObject.ModelTag + ".totRotEnergy")
+
 
     np.set_printoptions(precision=16)
 
@@ -425,6 +438,38 @@ def run(show_plots, useDVThrusters):
     plot_thrPosDiff(timeData, thrusterPosDiff)
     pltName = fileName + "thruster position difference"
     figureList[pltName] = plt.figure(3)
+
+    plt.figure()
+    plt.clf()
+    plt.plot(orbAngMom_N[:, 0] * 1e-9, (orbAngMom_N[:, 1] - orbAngMom_N[0, 1]) / orbAngMom_N[0, 1],
+             orbAngMom_N[:, 0] * 1e-9, (orbAngMom_N[:, 2] - orbAngMom_N[0, 2]) / orbAngMom_N[0, 2],
+             orbAngMom_N[:, 0] * 1e-9, (orbAngMom_N[:, 3] - orbAngMom_N[0, 3]) / orbAngMom_N[0, 3])
+    plt.xlabel('time (s)')
+    plt.ylabel('Relative Difference')
+    plt.title('Orbital Angular Momentum')
+
+    plt.figure()
+    plt.clf()
+    plt.plot(orbEnergy[:, 0] * 1e-9, (orbEnergy[:, 1] - orbEnergy[0, 1]) / orbEnergy[0, 1])
+    plt.xlabel('time (s)')
+    plt.ylabel('Relative Difference')
+    plt.title('Orbital Energy')
+
+    plt.figure()
+    plt.clf()
+    plt.plot(rotAngMom_N[:, 0] * 1e-9, (rotAngMom_N[:, 1] - rotAngMom_N[0, 1]) / rotAngMom_N[0, 1],
+             rotAngMom_N[:, 0] * 1e-9, (rotAngMom_N[:, 2] - rotAngMom_N[0, 2]) / rotAngMom_N[0, 2],
+             rotAngMom_N[:, 0] * 1e-9, (rotAngMom_N[:, 3] - rotAngMom_N[0, 3]) / rotAngMom_N[0, 3])
+    plt.xlabel('time (s)')
+    plt.ylabel('Relative Difference')
+    plt.title('Rotational Angular Momentum')
+
+    plt.figure()
+    plt.clf()
+    plt.plot(rotEnergy[:, 0] * 1e-9, (rotEnergy[:, 1] - rotEnergy[0, 1]) / rotEnergy[0, 1])
+    plt.xlabel('time (s)')
+    plt.ylabel('Relative Difference')
+    plt.title('Rotational Energy')
 
     if show_plots:
         plt.show()
