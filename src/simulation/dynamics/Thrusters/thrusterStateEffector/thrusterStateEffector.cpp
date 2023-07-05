@@ -440,7 +440,7 @@ void ThrusterStateEffector::calcForceTorqueOnBody(double integTime, Eigen::Vecto
         std::cout << "thrLoc_B (r_FcS_S)\n" << it->thrLoc_B << "\n";
         std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
         std::cout << "thrusterLocation_B (r_FcB_B)\n" << thrustLocation_B << "\n";
-        std::cout << "dcm_BF\n" << this->bodyToHubInfo.at(index).dcm_BF << "\n";
+        std::cout << "dcm_BF (dcm_BS)\n" << this->bodyToHubInfo.at(index).dcm_BF << "\n";
 
         //! - For each thruster, aggregate the current thrust direction into composite body force
         tmpThrustMag = it->MaxThrust * ops->ThrustFactor;

@@ -253,7 +253,7 @@ def run(show_plots, useDVThrusters):
 
     # initialize spacecraft object and set properties
     scObject = spacecraft.Spacecraft()
-    scObject.ModelTag = "bsk-Sat"
+    scObject.ModelTag = "bskSat"
     # define the simulation inertia
     I = [900., 0., 0.,
          0., 800., 0.,
@@ -319,6 +319,7 @@ def run(show_plots, useDVThrusters):
     thruster1.steadyIsp = 226.7
     thruster1.MinOnTime = 0.006
     thruster1.cutoffFrequency = 2
+    thruster1.attachedBodyAxis = np.array([[1.],[0.0],[0.0]])
     thrusterSet.addThruster(thruster1, spinningBody1.spinningBodyConfigLogOutMsg)
 
     # get number of thruster devices
