@@ -51,7 +51,7 @@ THRSimConfig
     char label[10];                                 //!< [-], label name of the TH device being simulated
     double cutoffFrequency;                         //!< [rad/s] cutoff frequency for first-order behavior
     double MaxSwirlTorque;                          //!< [Nm] Steady state magnitude of the swirl torque produced by ionic thrusters
-    std::vector<double> attachedBodyAxis;           //!< [-] Rotation axis of attached body hinge
+    Eigen::Vector3d attachedBodyAxis;               //!< [-] Rotation axis of attached body hinge
 }THRSimConfig;
 
 

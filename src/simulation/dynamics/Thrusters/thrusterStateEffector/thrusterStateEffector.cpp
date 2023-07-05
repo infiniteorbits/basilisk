@@ -212,8 +212,9 @@ void ThrusterStateEffector::UpdateThrusterProperties()
 
     // Loop through all thrusters
     std::vector<ReadFunctor<SCStatesMsgPayload>>::iterator it;
+    std::vector<THRSimConfig>::iterator arm;
     int index;
-    for (it = this->attachedBodyInMsgs.begin(), index = 0; it != this->attachedBodyInMsgs.end(); it++, index++)
+    for (it = this->attachedBodyInMsgs.begin(), arm = this->thrusterData.begin(), index = 0; it != this->attachedBodyInMsgs.end(); it++, arm++, index++)
     {
         // Check if the message is linked, and if so do the conversion
         if (it->isLinked() && it->isWritten())
@@ -240,6 +241,7 @@ void ThrusterStateEffector::UpdateThrusterProperties()
             std::cout << "r_FN_N (r_ScN_N)\n" << r_FN_N << "\n";
             std::cout << "r_BN_N (r_BN_N)\n" << r_BN_N << "\n";
             std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
+            std::cout << "attachedBodyAxis (sHat_B)\n" << arm->attachedBodyAxis << "\n";
         }
     }
 }
