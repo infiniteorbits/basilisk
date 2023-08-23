@@ -45,8 +45,7 @@ SpinningBodyOneDOFStateEffector::SpinningBodyOneDOFStateEffector()
     //std::cout << "nameOfThetaState = " + this-> nameOfThetaDotState + "\n";
 
     // Initialize property names
-    this->inertialPositionPropName = "spinningBodyInertialPosition" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
-    this->inertialAttitudePropName = "spinningBodyInertialAttitude" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
+    this->inertialPropName = "spinningBodyInertialProp" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
 
     SpinningBodyOneDOFStateEffector::effectorID++;
 }
@@ -136,7 +135,7 @@ void SpinningBodyOneDOFStateEffector::registerStates(DynParamManager& states)
     this->thetaDotState->setState(thetaDotInitMatrix);
 
     // Register inertial properties
-    // this->registerProperties(states);
+    this->registerProperties(states);
 }
 
 /*! This method allows the SB state effector to register its inertial properties: position and attitude with the dynamic parameter manager */

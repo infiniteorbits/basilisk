@@ -362,6 +362,8 @@ void ThrusterStateEffector::linkInStates(DynParamManager& states){
 	this->hubOmega = states.getStateObject("hubOmega");
     this->inertialPositionProperty = states.getPropertyReference(this->nameOfSpacecraftAttachedTo + "r_BN_N");
     std::cout << "linkInStates is now occuring\n";
+
+    
 }
 
 /*! This method allows the thruster state effector to register its state kappa with the dyn param manager */

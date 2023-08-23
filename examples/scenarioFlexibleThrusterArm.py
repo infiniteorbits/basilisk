@@ -329,7 +329,7 @@ def run(show_plots, useDVThrusters):
     thruster1.cutoffFrequency = 2
     thruster1.attachedBodyAxis = np.array([[1.],[0.0],[0.0]])
     # thrusterSet.addThruster(thruster1, spinningBody1.spinningBodyConfigLogOutMsg)
-    thrusterSet.addThruster(thruster1, scObject.dynManager, spinningBody1.inertialAttitudePropName)
+    thrusterSet.addThruster(thruster1, scObject.dynManager, spinningBody1.effectorName)
 
     # get number of thruster devices
     numTh = 1
