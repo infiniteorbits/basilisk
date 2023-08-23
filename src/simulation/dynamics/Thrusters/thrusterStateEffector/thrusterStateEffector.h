@@ -59,6 +59,7 @@ public:
 
     void addThruster(THRSimConfig* newThruster); //!< -- Add a new thruster to the thruster set
     void addThruster(THRSimConfig* newThruster, Message<SCStatesMsgPayload>* bodyStateMsg); //!< -- (overloaded) Add a new thruster to the thruster set connect to a body different than the hub
+    void addThruster(THRSimConfig* newThruster, DynParamManager& states, std::string inertialAttitudePropName);
     void ConfigureThrustRequests();
     void UpdateThrusterProperties();
 
@@ -78,8 +79,8 @@ public:
     StateData *hubOmega;        //!< pointer to hub angular velocity states
     StateData* kappaState;      //!< -- state manager of theta for hinged rigid body
     Eigen::MatrixXd* inertialPositionProperty;  //!< [m] r_N inertial position relative to system spice zeroBase/refBase
-    StateData *attachedBodyTheta;               //!< pointer to arm angle state
-    StateData *attachedBodyThetaDot;            //!< pointer to arm angle rate state
+    std::vector<Eigen::MatrixXd*> attachedBodyInertialAttitude; //!< -- property pointer to MRP attitude of connected body frame relative to inertial frame
+    std::vector<bool> propertyLinked;        //!< -- boolean representing whether attach body is connected via properties
 
     BSKLogger bskLogger;        //!< -- BSK Logging
 

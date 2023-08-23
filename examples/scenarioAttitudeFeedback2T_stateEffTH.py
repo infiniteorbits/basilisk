@@ -440,6 +440,8 @@ def run(show_plots, useDVThrusters):
     spinningBody1.k = 1.0
     spinningBody1.c = 0.5
 
+    spinningBody1.registerProperties(scObject.dynManager)
+
     scObject.addStateEffector(spinningBody1)
 
     # create a thruster attached to a spinningBodyOneDOFStateEffector
@@ -455,7 +457,8 @@ def run(show_plots, useDVThrusters):
     thruster2.steadyIsp = 226.7
     thruster2.MinOnTime = 0.006
     thruster2.cutoffFrequency = 2
-    thrusterSet.addThruster(thruster2, spinningBody1.spinningBodyConfigLogOutMsg)
+    # thrusterSet.addThruster(thruster2, spinningBody1.spinningBodyConfigLogOutMsg)
+    thrusterSet.addThruster(thruster2, scObject.dynManager, spinningBody1.inertialAttitudePropName)
 
     # get number of thruster devices
     numTh = thFactory.getNumOfDevices()
@@ -524,7 +527,8 @@ def run(show_plots, useDVThrusters):
     #
 
     numDataPoints = 100
-    samplingTime = unitTestSupport.samplingTime(simulationTime, fswTimeStep, numDataPoints)
+    # samplingTime = unitTestSupport.samplingTime(simulationTime, fswTimeStep, numDataPoints)
+    samplingTime = fswTimeStep
     mrpTorqueLog = mrpControlConfig.cmdTorqueOutMsg.recorder(samplingTime)
     attErrorLog = attErrorConfig.attGuidOutMsg.recorder(samplingTime)
     snTransLog = sNavObject.transOutMsg.recorder(samplingTime)

@@ -123,6 +123,12 @@ from Basilisk.utilities import RigidBodyKinematics
 # attempt to import vizard
 from Basilisk.utilities import vizSupport
 
+from Basilisk.utilities import (SimulationBaseClass, unitTestSupport, orbitalMotion, macros, RigidBodyKinematics,
+                                simIncludeRW, vizSupport)
+from Basilisk.simulation import (spacecraft, gravityEffector, svIntegrators, linearSpringMassDamper,
+                                 reactionWheelStateEffector, nHingedRigidBodyStateEffector, fuelTank, simpleNav, extForceTorque)
+
+
 bskPath = __path__[0]
 fileName = os.path.basename(os.path.splitext(__file__)[0])
 
@@ -303,6 +309,8 @@ def run(show_plots, useDVThrusters):
     spinningBody1.k = 1.0
     spinningBody1.c = 0.5
 
+    spinningBody1.registerProperties(scObject.dynManager)
+
     scObject.addStateEffector(spinningBody1)
     scSim.AddModelToTask(dynTaskName, spinningBody1, ModelPriority=10)
 
@@ -320,7 +328,8 @@ def run(show_plots, useDVThrusters):
     thruster1.MinOnTime = 0.006
     thruster1.cutoffFrequency = 2
     thruster1.attachedBodyAxis = np.array([[1.],[0.0],[0.0]])
-    thrusterSet.addThruster(thruster1, spinningBody1.spinningBodyConfigLogOutMsg)
+    # thrusterSet.addThruster(thruster1, spinningBody1.spinningBodyConfigLogOutMsg)
+    thrusterSet.addThruster(thruster1, scObject.dynManager, spinningBody1.inertialAttitudePropName)
 
     # get number of thruster devices
     numTh = 1
@@ -328,6 +337,33 @@ def run(show_plots, useDVThrusters):
     # create thruster object container and tie to spacecraft object
     thrModelTag = "ACSThrusterDynamics"
     thFactory.addToSpacecraft(thrModelTag, thrusterSet, scObject)
+
+    rwFactory = simIncludeRW.rwFactory()
+
+    # Set to jitter or balanced model
+    varRWModel = messaging.BalancedWheels
+
+    # create each RW by specifying the RW type, the spin axis gsHat, plus optional arguments
+    RW1 = rwFactory.create('Honeywell_HR16', [1, 0, 0], maxMomentum=50., Omega=0., RWModel=varRWModel)
+    RW1.U_s = 0.0
+    RW1.U_d = 0.0
+    #RW2 = rwFactory.create('Honeywell_HR16', [0, 1, 0], maxMomentum=50., Omega=200., RWModel=varRWModel)
+    #RW3 = rwFactory.create('Honeywell_HR16', [0, 0, 1], maxMomentum=50., Omega=300., RWModel=varRWModel)
+    numRW = rwFactory.getNumOfDevices()
+
+    # create RW object container and tie to spacecraft object
+    rwModelTag = "experimentWheel"
+    rwStateEffector = reactionWheelStateEffector.ReactionWheelStateEffector()
+    rwFactory.addToSpacecraft(rwModelTag, rwStateEffector, scObject)
+
+    # set RW torque command
+    cmdArray = messaging.ArrayMotorTorqueMsgPayload()
+    cmdArray.motorTorque = [0.1, 0.0, 0.0]  # [Nm]
+    cmdMsg = messaging.ArrayMotorTorqueMsg().write(cmdArray)
+    rwStateEffector.rwMotorCmdInMsg.subscribeTo(cmdMsg)
+
+    # add RWs to spacercraft
+    scSim.AddModelToTask(dynTaskName, rwStateEffector)
 
     #
     #   Setup data logging before the simulation is initialized

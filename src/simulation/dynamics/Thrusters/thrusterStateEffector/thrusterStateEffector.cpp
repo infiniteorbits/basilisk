@@ -52,6 +52,9 @@ ThrusterStateEffector::ThrusterStateEffector()
     this->thrusterOutMsgs.clear();
     this->NewThrustCmds.clear();
 
+    // property references
+    // *this->attachedBodyInertialAttitude = {};
+
     return;
 }
 
@@ -210,6 +213,8 @@ void ThrusterStateEffector::UpdateThrusterProperties()
     // Define the relative variables between the attached body and the hub
     Eigen::Matrix3d dcm_BF;
 
+    std::cout << "--------- UpdateThrusterProperties() ------------\n";
+
     // Loop through all thrusters
     std::vector<ReadFunctor<SCStatesMsgPayload>>::iterator it;
     std::vector<THRSimConfig>::iterator arm;
@@ -237,11 +242,23 @@ void ThrusterStateEffector::UpdateThrusterProperties()
             this->bodyToHubInfo.at(index).omega_FB_B = dcm_BF * omega_FN_F - omega_BN_B;
 
             std::cout << "-------- UpdateThrusterProperties() -------- (attached body state messages in thrusterStateEffector)\n";
-            std::cout.precision(10);
-            std::cout << "r_FN_N (r_ScN_N)\n" << r_FN_N << "\n";
-            std::cout << "r_BN_N (r_BN_N)\n" << r_BN_N << "\n";
-            std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
-            std::cout << "attachedBodyAxis (sHat_B)\n" << arm->attachedBodyAxis << "\n";
+            // std::cout.precision(10);
+            // std::cout << "r_FN_N (r_ScN_N)\n" << r_FN_N << "\n";
+            // std::cout << "r_BN_N (r_BN_N)\n" << r_BN_N << "\n";
+            // std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
+            // std::cout << "attachedBodyAxis (sHat_B)\n" << arm->attachedBodyAxis << "\n";
+        }
+        // Check if the property is linked, and if so do the conversion
+        else if (this->propertyLinked.at(index))
+        {
+            // Do the math using the property
+            Eigen::MRPd sigma_FN;
+            sigma_FN = (Eigen::Vector3d)*this->attachedBodyInertialAttitude.at(index);
+            dcm_FN = (sigma_FN.toRotationMatrix()).transpose();
+            dcm_BF = dcm_BN * dcm_FN.transpose();
+
+            std::cout << "---------- triggered an updateThrusterProperties with spinningOneDOF property\n";
+            this->bodyToHubInfo.at(index).dcm_BF = dcm_BF;
         }
     }
 }
@@ -262,6 +279,7 @@ void ThrusterStateEffector::addThruster(THRSimConfig* newThruster)
     // Push back an empty message
     ReadFunctor<SCStatesMsgPayload> emptyReadFunctor;
     this->attachedBodyInMsgs.push_back(emptyReadFunctor);
+    this->propertyLinked.push_back(false);
 
     // Add space for the conversion from body to hub and populate it with default values
     BodyToHubInfo attachedBodyToHub;
@@ -286,6 +304,7 @@ void ThrusterStateEffector::addThruster(THRSimConfig* newThruster, Message<SCSta
 
     // Save the incoming body message
     this->attachedBodyInMsgs.push_back(bodyStateMsg->addSubscriber());
+    this->propertyLinked.push_back(false);
 
     // Add space for the conversion from body to hub and populate it with default values
     BodyToHubInfo attachedBodyToHub;
@@ -293,34 +312,46 @@ void ThrusterStateEffector::addThruster(THRSimConfig* newThruster, Message<SCSta
     attachedBodyToHub.r_FB_B.setZero();
     attachedBodyToHub.omega_FB_B.setZero();
     this->bodyToHubInfo.push_back(attachedBodyToHub);
-    std::cout << "addThruster is now occuring\n";
-
-    return;
 }
 
-// void ThrusterStateEffector::addThruster(THRSimConfig* newThruster, Message<SCStatesMsgPayload>* bodyStateMsg)
-// {
-//     this->thrusterData.push_back(*newThruster);
+void ThrusterStateEffector::addThruster(THRSimConfig* newThruster, DynParamManager& states, std::string inertialAttitudePropName)
+{
+    std::cout << "addThruster is now occuring\n";
 
-//     // Create corresponding output message
-//     Message<THROutputMsgPayload>* msg;
-//     msg = new Message<THROutputMsgPayload>;
-//     this->thrusterOutMsgs.push_back(msg);
+    this->thrusterData.push_back(*newThruster);
 
-//     // Set the initial condition
-//     double state = 0.0;
-//     this->kappaInit.push_back(state);
+    // Create corresponding output message
+    Message<THROutputMsgPayload>* msg;
+    msg = new Message<THROutputMsgPayload>;
+    this->thrusterOutMsgs.push_back(msg);
 
-//     // Save the incoming body message
-//     this->attachedBodyInMsgs.push_back(bodyStateMsg->addSubscriber());
+    // Set the initial condition
+    double state = 0.0;
+    this->kappaInit.push_back(state);
 
-//     // Add space for the conversion from body to hub and populate it with default values
-//     BodyToHubInfo attachedBodyToHub;
-//     attachedBodyToHub.dcm_BF.setIdentity();
-//     attachedBodyToHub.r_FB_B.setZero();
-//     attachedBodyToHub.omega_FB_B.setZero();
-//     this->bodyToHubInfo.push_back(attachedBodyToHub);
-// }
+    // Push back an empty message
+    ReadFunctor<SCStatesMsgPayload> emptyReadFunctor;
+    this->attachedBodyInMsgs.push_back(emptyReadFunctor);
+
+    // Collect the connected body property reference
+    // this->inertialConnectedBodyPosition = states.getPropertyReference(connectedBodyPropReference);
+    // std::cout << "connectedBodyAttitude before" << *this->attachedBodyInertialAttitude << "\n";
+    this->attachedBodyInertialAttitude.push_back(states.getPropertyReference(inertialAttitudePropName));
+    this->propertyLinked.push_back(true);
+
+    // std::cout << "connectedBodyAttitude after" << this->attachedBodyInertialAttitude->size() << "\n";
+    // Eigen::Vector3d sigma_FN = *this->attachedBodyInertialAttitude;
+    // std::cout << "size test: " << sigma_FN.size() << "\n";
+    // Eigen::VectorXd sigma = {};
+    // std::cout << "empty size test: " << sigma.size() << "\n";
+
+    // Add space for the conversion from body to hub and populate it with default values
+    BodyToHubInfo attachedBodyToHub;
+    attachedBodyToHub.dcm_BF.setIdentity();
+    attachedBodyToHub.r_FB_B.setZero();
+    attachedBodyToHub.omega_FB_B.setZero();
+    this->bodyToHubInfo.push_back(attachedBodyToHub);
+}
 
 /*! This method is used to link the states to the thrusters
  @return void
@@ -331,13 +362,6 @@ void ThrusterStateEffector::linkInStates(DynParamManager& states){
 	this->hubOmega = states.getStateObject("hubOmega");
     this->inertialPositionProperty = states.getPropertyReference(this->nameOfSpacecraftAttachedTo + "r_BN_N");
     std::cout << "linkInStates is now occuring\n";
-    //if it->isLinked()
-    if (true)
-    {
-        this->attachedBodyTheta = states.getStateObject("spinningBodyTheta1");
-        this->attachedBodyThetaDot = states.getStateObject("spinningBodyThetaDot1");
-        std::cout << "confirming spinningBodyThetaState " << this->attachedBodyTheta->getState() << "\n";
-    }
 }
 
 /*! This method allows the thruster state effector to register its state kappa with the dyn param manager */
@@ -423,6 +447,10 @@ void ThrusterStateEffector::calcForceTorqueOnBody(double integTime, Eigen::Vecto
 
     axesWeightMatrix << 2, 0, 0, 0, 1, 0, 0, 0, 1;
 
+    // update thruster properties if property linking is used
+    std::cout << "---------- calcForceTorqueOnBody ---------- in thrusterStateEffector\n";
+    this->UpdateThrusterProperties();
+
     // Loop variables
     std::vector<THRSimConfig>::iterator it;
     THROperation* ops;
@@ -434,15 +462,16 @@ void ThrusterStateEffector::calcForceTorqueOnBody(double integTime, Eigen::Vecto
         // Save the thruster ops information
         ops = &it->ThrustOps;
 
+        std::cout << "dcm_BF test:\n" << this->bodyToHubInfo.at(index).dcm_BF << "\n";
         // Compute the thruster properties wrt the hub (note that B refers to the F frame when extracting from the thruster info)
         thrustDirection_B = this->bodyToHubInfo.at(index).dcm_BF * it->thrDir_B;
         thrustLocation_B = this->bodyToHubInfo.at(index).r_FB_B + this->bodyToHubInfo.at(index).dcm_BF * it->thrLoc_B;
 
-        std::cout << "-------- calcForceTorqueOnBody() -------- (thruster position calc in thrusterStateEffector)\n";
-        std::cout << "thrLoc_B (r_FcS_S)\n" << it->thrLoc_B << "\n";
-        std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
-        std::cout << "thrusterLocation_B (r_FcB_B)\n" << thrustLocation_B << "\n";
-        std::cout << "dcm_BF (dcm_BS)\n" << this->bodyToHubInfo.at(index).dcm_BF << "\n";
+        // std::cout << "-------- calcForceTorqueOnBody() -------- (thruster position calc in thrusterStateEffector)\n";
+        // std::cout << "thrLoc_B (r_FcS_S)\n" << it->thrLoc_B << "\n";
+        // std::cout << "r_FB_B (r_ScB_B)\n" << this->bodyToHubInfo.at(index).r_FB_B << "\n";
+        // std::cout << "thrusterLocation_B (r_FcB_B)\n" << thrustLocation_B << "\n";
+        // std::cout << "dcm_BF (dcm_BS)\n" << this->bodyToHubInfo.at(index).dcm_BF << "\n";
 
         //! - For each thruster, aggregate the current thrust direction into composite body force
         tmpThrustMag = it->MaxThrust * ops->ThrustFactor;
@@ -485,6 +514,7 @@ void ThrusterStateEffector::calcForceTorqueOnBody(double integTime, Eigen::Vecto
 
 void ThrusterStateEffector::updateContributions(double integTime, BackSubMatrices& backSubContr, Eigen::Vector3d sigma_BN, Eigen::Vector3d omega_BN_B, Eigen::Vector3d g_N)
 {
+    std::cout << "-------- ThrusterStateEffector - updateContributions() --------\n";
     // Define the translational and rotational contributions from the computed force and torque
     backSubContr.vecTrans = this->forceOnBody_B;
     backSubContr.vecRot = this->torqueOnBodyPntB_B;

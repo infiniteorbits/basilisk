@@ -45,6 +45,8 @@ public:
     double thetaDotInit = 0.0;                                  //!< [rad/s] initial spinning body angle rate
     std::string nameOfThetaState;                               //!< -- identifier for the theta state data container
     std::string nameOfThetaDotState;                            //!< -- identifier for the thetaDot state data container
+    std::string inertialPositionPropName;                       //!< -- name of the inertial position property
+    std::string inertialAttitudePropName;                       //!< -- name of the inertial position property
     Eigen::Vector3d r_SB_B;                                     //!< [m] vector pointing from body frame B origin to spinning frame S origin in B frame components
     Eigen::Vector3d r_ScS_S;                                    //!< [m] vector pointing from spinning frame S origin to point Sc (center of mass of the spinner) in S frame components
     Eigen::Vector3d sHat_S;                                     //!< -- spinning axis in S frame components.
@@ -61,6 +63,7 @@ public:
     void writeOutputStateMessages(uint64_t CurrentClock) override;   //!< -- Method for writing the output messages
     void UpdateState(uint64_t CurrentSimNanos) override;             //!< -- Method for updating information
     void registerStates(DynParamManager& statesIn) override;         //!< -- Method for registering the SB states
+    void registerProperties(DynParamManager& statesIn);              //!< -- Method for registering the inertial properties
     void linkInStates(DynParamManager& states) override;             //!< -- Method for getting access to other states
     void updateContributions(double integTime, BackSubMatrices& backSubContr, Eigen::Vector3d sigma_BN, Eigen::Vector3d omega_BN_B, Eigen::Vector3d g_N) override;   //!< -- Method for back-substitution contributions
     void computeDerivatives(double integTime, Eigen::Vector3d rDDot_BN_N, Eigen::Vector3d omegaDot_BN_B, Eigen::Vector3d sigma_BN) override;                         //!< -- Method for SB to compute its derivatives
@@ -103,7 +106,7 @@ private:
     // Spinning body properties
     Eigen::Vector3d r_ScN_N;            //!< [m] position vector of spinning body center of mass Sc relative to the inertial frame origin N
     Eigen::Vector3d v_ScN_N;            //!< [m/s] inertial velocity vector of Sc relative to inertial frame
-    Eigen::Vector3d sigma_SN;           //!< -- MRP attitude of frame S relative to inertial frame
+    Eigen::MatrixXd *sigma_SN;           //!< -- MRP attitude of frame S relative to inertial frame
     Eigen::Vector3d omega_SN_S;         //!< [rad/s] inertial spinning body frame angular velocity vector
 
     // States

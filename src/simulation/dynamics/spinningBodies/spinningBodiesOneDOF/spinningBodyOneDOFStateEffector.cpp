@@ -43,6 +43,11 @@ SpinningBodyOneDOFStateEffector::SpinningBodyOneDOFStateEffector()
     this->nameOfThetaState = "spinningBodyTheta" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
     this->nameOfThetaDotState = "spinningBodyThetaDot" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
     //std::cout << "nameOfThetaState = " + this-> nameOfThetaDotState + "\n";
+
+    // Initialize property names
+    this->inertialPositionPropName = "spinningBodyInertialPosition" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
+    this->inertialAttitudePropName = "spinningBodyInertialAttitude" + std::to_string(SpinningBodyOneDOFStateEffector::effectorID);
+
     SpinningBodyOneDOFStateEffector::effectorID++;
 }
 
@@ -94,7 +99,7 @@ void SpinningBodyOneDOFStateEffector::writeOutputStateMessages(uint64_t CurrentC
         std::cout << "r_SB_B\n" << this->r_SB_B << "\n";
         std::cout << "r_BN_N\n" << (Eigen::Vector3d)*this->inertialPositionProperty << "\n";
         eigenVector3d2CArray(this->v_ScN_N, configLogMsg.v_BN_N);
-        eigenVector3d2CArray(this->sigma_SN, configLogMsg.sigma_BN);
+        eigenMatrixXd2CArray(*this->sigma_SN, configLogMsg.sigma_BN);
         eigenVector3d2CArray(this->omega_SN_S, configLogMsg.omega_BN_B);
         this->spinningBodyConfigLogOutMsg.write(&configLogMsg, this->moduleID, CurrentClock);
     }
@@ -129,6 +134,21 @@ void SpinningBodyOneDOFStateEffector::registerStates(DynParamManager& states)
     Eigen::MatrixXd thetaDotInitMatrix(1,1);
     thetaDotInitMatrix(0,0) = this->thetaDotInit;
     this->thetaDotState->setState(thetaDotInitMatrix);
+
+    // Register inertial properties
+    // this->registerProperties(states);
+}
+
+/*! This method allows the SB state effector to register its inertial properties: position and attitude with the dynamic parameter manager */
+void SpinningBodyOneDOFStateEffector::registerProperties(DynParamManager& statesIn)
+{
+    std::cout << "-------- registerProperties() -------- inside of spinningOneDOF\n";
+    Eigen::Vector3d stateInit;
+    stateInit.fill(0.0);
+
+    // Register the inertial position and attitude states
+    // this->r_SN_N = statesIn.createProperty(this->inertialPositionPropName, stateInit);
+    this->sigma_SN = statesIn.createProperty(this->inertialAttitudePropName, stateInit);
 }
 
 /*! This method allows the SB state effector to provide its contributions to the mass props and mass prop rates of the
@@ -191,6 +211,10 @@ void SpinningBodyOneDOFStateEffector::updateContributions(double integTime,
                                                           Eigen::Vector3d omega_BN_B,
                                                           Eigen::Vector3d g_N)
 {
+    std::cout << "-------- SpinningBodyOneDOFStateEffector - updateContributions --------\n";
+    // Update Inertial Parameters for Connected Bodies
+    this->computeSpinningBodyInertialStates();
+    
     // Define omega_SN_B
     this->omega_BN_B = omega_BN_B;
     this->omegaTilde_BN_B = eigenTilde(this->omega_BN_B);
@@ -280,9 +304,6 @@ void SpinningBodyOneDOFStateEffector::computeDerivatives(double integTime,
     thetaDDot(0, 0) = this->aTheta.dot(rDDotLocal_BN_B)
             + this->bTheta.dot(omegaDotLocal_BN_B) + this->cTheta;
     this->thetaDotState->setDerivative(thetaDDot);
-
-    // Update Inertial States for Connected Bodies
-    //this->computeSpinningBodyInertialStates();
 }
 
 /*! This method is for calculating the contributions of the SB state effector to the energy and momentum of the spacecraft */
@@ -311,11 +332,14 @@ void SpinningBodyOneDOFStateEffector::updateEnergyMomContributions(double integT
 /*! This method computes the spinning body states relative to the inertial frame */
 void SpinningBodyOneDOFStateEffector::computeSpinningBodyInertialStates()
 {
+    std::cout << "-------- computeSpinningBodyInertialStates() -------- inside of spinningOneDOF\n";
+    
     // inertial attitude
     Eigen::Matrix3d dcm_SN;
     dcm_SN = (this->dcm_BS).transpose() * this->dcm_BN;
-    this->sigma_SN = eigenMRPd2Vector3d(eigenC2MRP(dcm_SN));
-
+    *this->sigma_SN = eigenMRPd2Vector3d(eigenC2MRP(dcm_SN));
+    std::cout << "sigma_SN = \n" << *this->sigma_SN << "\n";
+    
     // inertial attitude rate
     this->omega_SN_S = (this->dcm_BS).transpose() * this->omega_SN_B;
 
