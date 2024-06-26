@@ -89,6 +89,8 @@ private:
     StateData *thetaState;           //!< -- state manager of theta for hinged rigid body
     Eigen::MatrixXd *inertialPositionProperty;  //!< [m] r_N inertial position relative to system spice zeroBase/refBase
     Eigen::MatrixXd *inertialVelocityProperty;  //!< [m] v_N inertial velocity relative to system spice zeroBase/refBase
+    Eigen::MatrixXd *inertialAttitudeProperty;  //!< sigma_BN inertial MRP attitude
+    Eigen::MatrixXd *inertialAngVelocityProperty;  //!< [rad/sec] omega_BN_B inertial angular velocity vector
 
     StateData *thetaDotState;        //!< -- state manager of thetaDot for hinged rigid body
     Eigen::MatrixXd *c_B;            //!< [m] Vector from point B to CoM of s/c in B frame components

@@ -112,6 +112,8 @@ void HingedRigidBodyStateEffector::linkInStates(DynParamManager& statesIn)
     this->omega_BN_B = statesIn.getStateObject(this->nameOfSpacecraftAttachedTo + this->stateNameOfOmega);
     this->inertialPositionProperty = statesIn.getPropertyReference(this->nameOfSpacecraftAttachedTo + this->propName_inertialPosition);
     this->inertialVelocityProperty = statesIn.getPropertyReference(this->nameOfSpacecraftAttachedTo + this->propName_inertialVelocity);
+    this->inertialAttitudeProperty = statesIn.getPropertyReference(this->nameOfSpacecraftAttachedTo + this->propName_inertialAttitude);
+    this->inertialAngVelocityProperty = statesIn.getPropertyReference(this->nameOfSpacecraftAttachedTo + this->propName_inertialAngVelocity);
 
     return;
 }
@@ -368,7 +370,7 @@ void HingedRigidBodyStateEffector::computePanelInertialStates()
 {
     // inertial attitude
     Eigen::MRPd sigmaBN;
-    sigmaBN = (Eigen::Vector3d)this->sigma_BN->getState();
+    sigmaBN = (Eigen::Vector3d)*this->inertialAttitudeProperty;
     Eigen::Matrix3d dcm_NP = sigmaBN.toRotationMatrix();  // assumes P and B are idential
     Eigen::Matrix3d dcm_SN;
     dcm_SN = this->dcm_SP*dcm_NP.transpose();
@@ -377,7 +379,7 @@ void HingedRigidBodyStateEffector::computePanelInertialStates()
 
     // inertial angular velocity
     Eigen::Vector3d omega_BN_B;
-    omega_BN_B = (Eigen::Vector3d)this->omega_BN_B->getState();
+    omega_BN_B = *this->inertialAngVelocityProperty;
     this->omega_SN_S = this->dcm_SP * ( omega_BN_B + this->thetaDot*this->sHat2_P);
 
     // inertial position vector
