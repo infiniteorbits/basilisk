@@ -52,6 +52,12 @@ void StateEffector::updateEffectorMassProps(double integTime)
     return;
 }
 
+/*! This method is updates the effector states stored as properties in the state engine */
+void StateEffector::updateEffectorStateProps()
+{
+
+}
+
 void StateEffector::receiveMotherSpacecraftData(Eigen::Vector3d rSC_BP_P, Eigen::Matrix3d dcmSC_BP)
 {
     this->r_BP_P = rSC_BP_P;
@@ -239,4 +245,29 @@ void StateEffector::setPropName_vehicleGravity(std::string value)
     } else {
         bskLogger.bskLog(BSK_ERROR, "StateEffector: propName_vehicleGravity variable must be a non-empty string");
     }
+}
+
+void StateEffector::setPropName_inertialAttitude(std::string value)
+{
+    // check that value is acceptable
+    if (!value.empty()) {
+        this->propName_inertialAttitude = value;
+    } else {
+        bskLogger.bskLog(BSK_ERROR, "StateEffector: propName_inertialAttitude variable must be a non-empty string");
+    }
+}
+
+void StateEffector::setPropName_inertialAngVelocity(std::string value)
+{
+    // check that value is acceptable
+    if (!value.empty()) {
+        this->propName_inertialAngVelocity = value;
+    } else {
+        bskLogger.bskLog(BSK_ERROR, "StateEffector: propName_inertialAngVelocity variable must be a non-empty string");
+    }
+}
+
+void StateEffector::registerProperties(DynParamManager& states)
+{
+
 }

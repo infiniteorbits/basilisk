@@ -185,11 +185,13 @@ void SpacecraftUnit::initializeDynamicsSC(DynParamManager& statesIn)
 
     // - Register the hub states
     this->hub.registerStates(statesIn);
+    this->hub.registerProperties(statesIn);
 
     // - Loop through stateEffectors to register their states
     for(stateIt = this->states.begin(); stateIt != this->states.end(); stateIt++)
     {
         (*stateIt)->registerStates(statesIn);
+        (*stateIt)->registerProperties(statesIn);
     }
 
     // - Link in states for the spacecraft, gravity and the hub
@@ -455,6 +457,7 @@ void SpacecraftSystem::initializeDynamics()
     for(spacecraftUnConnectedIt = this->unDockedSpacecraft.begin(); spacecraftUnConnectedIt != this->unDockedSpacecraft.end(); spacecraftUnConnectedIt++)
     {
         this->updateSpacecraftMassProps(0.0, (*(*spacecraftUnConnectedIt)));
+        this->updateSpacecraftStateProps((*(*spacecraftUnConnectedIt)));
     }
 
     // - Edit r_BN_N and v_BN_N to take into account that point B and point C are not coincident
@@ -529,6 +532,19 @@ void SpacecraftSystem::updateSpacecraftMassProps(double time, SpacecraftUnit& sp
     (*spacecraft.cDot_B) = (*spacecraft.cPrime_B) + omegaLocal_BN_B.cross(cLocal_B);
 
     return;
+}
+
+/*! This method is used to update the spacecraft state properties stored in the state engine */
+void SpacecraftSystem::updateSpacecraftStateProps(SpacecraftUnit& spacecraft)
+{
+    // updated hub state properties
+    spacecraft.hub.updateEffectorStateProps();
+
+    // - Loop through state effectors to update state properties
+    for(auto it = spacecraft.states.begin(); it != spacecraft.states.end(); it++)
+    {
+        (*it)->updateEffectorStateProps();
+    }
 }
 
 void SpacecraftSystem::updateSystemMassProps(double time)
@@ -655,6 +671,7 @@ void SpacecraftSystem::equationsOfMotionSC(double integTimeSeconds, double timeS
 
     // - Update the mass properties of the spacecraft
     this->updateSpacecraftMassProps(integTimeSeconds, spacecraft);
+    this->updateSpacecraftStateProps(spacecraft);
 
     // - This is where gravity is computed (gravity needs to know c_B to calculated gravity about r_CN_N)
     Eigen::MRPd sigmaBNLoc;
@@ -1293,6 +1310,8 @@ void SpacecraftSystem::postIntegration(double integrateToThisTime) {
     for(spacecraftUnConnectedIt = this->unDockedSpacecraft.begin(); spacecraftUnConnectedIt != this->unDockedSpacecraft.end(); spacecraftUnConnectedIt++)
     {
         this->updateSpacecraftMassProps(integrateToThisTime, (*(*spacecraftUnConnectedIt)));
+        this->updateSpacecraftStateProps((*(*spacecraftUnConnectedIt)));
+
     }
 
     this->calculateDeltaVandAcceleration(this->primaryCentralSpacecraft, this->timeStep);

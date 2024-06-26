@@ -52,12 +52,23 @@ public:
     void linkInStates(DynParamManager& statesIn);  //!< -- Method to give the hub access to states
     void registerStates(DynParamManager& states);  //!< -- Method for the hub to register some states
     void updateEffectorMassProps(double integTime);  //!< -- Method for the hub to update its mass props for the s/c
+    void updateEffectorStateProps();  //!< Method for stateEffector to update state properties in state engine
     void computeDerivatives(double integTime, Eigen::Vector3d rDDot_BN_N, Eigen::Vector3d omegaDot_BN_B, Eigen::Vector3d sigma_BN);  //!< -- Method for the hub to compute it's derivatives
     void updateEnergyMomContributions(double integTime, Eigen::Vector3d & rotAngMomPntCContr_B,
                                       double & rotEnergyContr, Eigen::Vector3d omega_BN_B); //!< -- Add contributions to energy and momentum
     void modifyStates(double integTime); //!< -- Method to switch MRPs
     void prependSpacecraftNameToStates(); //!< class method
     void matchGravitytoVelocityState(Eigen::Vector3d v_CN_N); //!< method to set the gravity velocity to base velocity
+    void registerProperties(DynParamManager &statesIn);
+
+    /** setter for `propName_inertialAttitude` property */
+    void setPropName_inertialAttitude(std::string value);
+    /** getter for `propName_inertialAttitude` property */
+    const std::string getPropName_inertialAttitude() const { return this->propName_inertialAttitude; }
+    /** setter for `propName_inertialAngVelocity` property */
+    void setPropName_inertialAngVelocity(std::string value);
+    /** getter for `propName_inertialAngVelocity` property */
+    const std::string getPropName_inertialAngVelocity() const { return this->propName_inertialAngVelocity; }
 
 private:
     Eigen::Vector3d r_BcP_P;             //!< [m] vector from point B to CoM of hub in B frame components
@@ -69,6 +80,11 @@ private:
     StateData *omegaState;               //!< [-] State data container for hub omegaBN_B
     StateData *gravVelocityState;        //!< [-] State data container for hub gravitational velocity
     StateData *gravVelocityBcState;      //!< [-] State data container for point Bc gravitational velocity
+
+    Eigen::MatrixXd *inertialAttitudeProperty;  //!< sigma_BN inertial attitude
+    Eigen::MatrixXd *inertialAngVelocityProperty;  //!< [rad/sec] omega_BN_B inertial angular velocity
+    std::string propName_inertialAttitude = "sigma_BN";   /**< Name of the inertial attitude property */
+    std::string propName_inertialAngVelocity = "omega_BN_B";   /**< Name of the inertial angular velocity property */
 };
 
 #endif /* HUB_EFFECTOR_H */

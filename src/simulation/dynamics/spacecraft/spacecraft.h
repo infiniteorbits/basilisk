@@ -81,6 +81,7 @@ public:
     void initializeDynamics();           //!< This method initializes all of the dynamics and variables for the s/c
     void computeEnergyMomentum(double time);  //!< This method computes the total energy and momentum of the s/c
     void updateSCMassProps(double time);  //!< This method computes the total mass properties of the s/c
+    void updateSCStateProps();  //!< This method computes the state properties of the spacecraft
     void calcForceTorqueFromStateEffectors(double time, Eigen::Vector3d omega_BN_B);  //!< This method computes the force and torque from the stateEffectors
     void Reset(uint64_t CurrentSimNanos);
 	void writeOutputStateMessages(uint64_t clockTime); //!< Method to write all of the class output messages
@@ -113,6 +114,8 @@ private:
         effector->setPropName_centerOfMassDotSC(this->propName_centerOfMassDotSC);
         effector->setPropName_inertialPosition(this->gravField.inertialPositionPropName);
         effector->setPropName_inertialVelocity(this->gravField.inertialVelocityPropName);
+        effector->setPropName_inertialAttitude(this->hub.getPropName_inertialAttitude());
+        effector->setPropName_inertialAngVelocity(this->hub.getPropName_inertialAngVelocity());
         effector->setPropName_vehicleGravity(this->gravField.vehicleGravityPropName);
     };
 

@@ -237,12 +237,14 @@ void Spacecraft::initializeDynamics()
 
     // - Register the hub states
     this->hub.registerStates(this->dynManager);
+    this->hub.registerProperties(this->dynManager);
 
     // - Loop through stateEffectors to register their states
     std::vector<StateEffector*>::iterator stateIt;
     for(stateIt = this->states.begin(); stateIt != this->states.end(); stateIt++)
     {
         (*stateIt)->registerStates(this->dynManager);
+        (*stateIt)->registerProperties(this->dynManager);
     }
 
     // - Link in states for the Spacecraft, gravity and the hub
@@ -252,6 +254,8 @@ void Spacecraft::initializeDynamics()
 
     // - Update the mass properties of the spacecraft to retrieve c_B and cDot_B to update r_BN_N and v_BN_N
     this->updateSCMassProps(0.0);
+    // Update the spacecraft state properties stored in the state engine
+    this->updateSCStateProps();
 
     // - Edit r_BN_N and v_BN_N to take into account that point B and point C are not coincident
     // - Pulling the state from the hub at this time gives us r_CN_N
@@ -330,6 +334,19 @@ void Spacecraft::updateSCMassProps(double time)
     (*this->cDot_B) = (*this->cPrime_B) + omegaLocal_BN_B.cross(cLocal_B);
 }
 
+/*! This method is used to update the spacecraft state properties stored in the state engine */
+void Spacecraft::updateSCStateProps()
+{
+    // updated hub state properties
+    this->hub.updateEffectorStateProps();
+
+    // - Loop through state effectors to update state properties
+    for(auto it = this->states.begin(); it != this->states.end(); it++)
+    {
+        (*it)->updateEffectorStateProps();
+    }
+}
+
 /*! This method is solving Xdot = F(X,t) for the system. The hub needs to calculate its derivatives, along with all of
  the stateEffectors. The hub also has gravity and dynamicEffectors acting on it and these relationships are controlled
  in this method. At the end of this method all of the states will have their corresponding state derivatives set in the
@@ -353,6 +370,7 @@ void Spacecraft::equationsOfMotion(double integTimeSeconds, double timeStep)
 
     // - Update the mass properties of the spacecraft
     this->updateSCMassProps(integTimeSeconds);
+    this->updateSCStateProps();
 
     // - This is where gravity is computed (gravity needs to know c_B to calculated gravity about r_CN_N)
     Eigen::MRPd sigmaBNLoc;
@@ -481,6 +499,7 @@ void Spacecraft::postIntegration(double integrateToThisTime) {
 
     // - Call mass properties to get current info on the mass props of the spacecraft
     this->updateSCMassProps(integrateToThisTime);
+    this->updateSCStateProps();
 
     // - Find v_CN_N after the integration for accumulated DV
     Eigen::Vector3d newV_BN_N = this->hubV_N->getState(); // - V_BN_N after integration

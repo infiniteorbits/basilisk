@@ -73,6 +73,8 @@ void HubEffector::prependSpacecraftNameToStates()
     this->nameOfHubOmega = this->nameOfSpacecraftAttachedTo + this->nameOfHubOmega;
     this->nameOfHubGravVelocity = this->nameOfSpacecraftAttachedTo + this->nameOfHubGravVelocity;
     this->nameOfBcGravVelocity = this->nameOfSpacecraftAttachedTo + this->nameOfBcGravVelocity;
+    this->propName_inertialAttitude = this->nameOfSpacecraftAttachedTo + this->propName_inertialAttitude;
+    this->propName_inertialAngVelocity = this->nameOfSpacecraftAttachedTo + this->propName_inertialAngVelocity;
 
     return;
 }
@@ -99,6 +101,18 @@ void HubEffector::registerStates(DynParamManager& states)
     return;
 }
 
+/** Registers the attitude related properties. */
+void HubEffector::registerProperties(DynParamManager& statesIn)
+{
+    static const Eigen::Vector3d zeroVector3d = Eigen::Vector3d::Zero();
+
+    this->inertialAttitudeProperty =
+        statesIn.createProperty(this->propName_inertialAttitude, zeroVector3d);
+    this->inertialAngVelocityProperty =
+        statesIn.createProperty(this->propName_inertialAngVelocity, zeroVector3d);
+}
+
+
 /*! This method allows the hub to give its mass properties to the spacecraft */
 void HubEffector::updateEffectorMassProps(double integTime)
 {
@@ -122,6 +136,14 @@ void HubEffector::updateEffectorMassProps(double integTime)
 
     return;
 }
+
+/*! This method is updates the effector states stored as properties in the state engine */
+void HubEffector::updateEffectorStateProps()
+{
+    *this->inertialAttitudeProperty = sigmaState->getState();
+    *this->inertialAngVelocityProperty = omegaState->getState();
+}
+
 
 /*! This method is for computing the derivatives of the hub: rDDot_BN_N and omegaDot_BN_B, along with the kinematic
  derivatives */
@@ -185,7 +207,7 @@ void HubEffector::updateEnergyMomContributions(double integTime, Eigen::Vector3d
 
     // - Find rotational energy contribution from the hub
     rotEnergyContr = 1.0/2.0*omegaLocal_BN_B.dot(IHubPntBc_P*omegaLocal_BN_B) + 1.0/2.0*mHub*rDot_BcB_B.dot(rDot_BcB_B);
-    
+
     return;
 }
 
@@ -208,4 +230,24 @@ void HubEffector::matchGravitytoVelocityState(Eigen::Vector3d v_CN_N)
 {
     this->gravVelocityState->setState(this->velocityState->getState());
     this->gravVelocityBcState->setState(v_CN_N);
+}
+
+void HubEffector::setPropName_inertialAttitude(std::string value)
+{
+    // check that value is acceptable
+    if (!value.empty()) {
+        this->propName_inertialAttitude = value;
+    } else {
+        bskLogger.bskLog(BSK_ERROR, "HubEffector: propName_inertialAttitude variable must be a non-empty string");
+    }
+}
+
+void HubEffector::setPropName_inertialAngVelocity(std::string value)
+{
+    // check that value is acceptable
+    if (!value.empty()) {
+        this->propName_inertialAngVelocity = value;
+    } else {
+        bskLogger.bskLog(BSK_ERROR, "HubEffector: propName_inertialAngVelocity variable must be a non-empty string");
+    }
 }

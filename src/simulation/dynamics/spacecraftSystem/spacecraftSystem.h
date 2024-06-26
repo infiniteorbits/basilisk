@@ -139,6 +139,8 @@ private:
         effector->setPropName_centerOfMassDotSC(this->propName_centerOfMassDotSC);
         effector->setPropName_inertialPosition(this->gravField.inertialPositionPropName);
         effector->setPropName_inertialVelocity(this->gravField.inertialVelocityPropName);
+        effector->setPropName_inertialAttitude(this->hub.getPropName_inertialAttitude());
+        effector->setPropName_inertialAngVelocity(this->hub.getPropName_inertialAngVelocity());
         effector->setPropName_vehicleGravity(this->gravField.vehicleGravityPropName);
     };
 
@@ -192,6 +194,7 @@ public:
     void computeEnergyMomentumSC(double time, SpacecraftUnit& spacecraft);  //!< This method computes the total energy and momentum of the s/c
     void computeEnergyMomentumSystem(double time);  //!< This method computes the total energy and momentum of the s/c
     void updateSpacecraftMassProps(double time, SpacecraftUnit& spacecraft);  //!< This method computes the total mass properties of the s/c
+    void updateSpacecraftStateProps(SpacecraftUnit& spacecraft);  //!< This method computes the state properties of the spacecraft
     void updateSystemMassProps(double time);  //!< This method computes the total mass properties of the s/c
     void initializeSCPosVelocity(SpacecraftUnit& spacecraft); //!< class method
     void Reset(uint64_t CurrentSimNanos);
