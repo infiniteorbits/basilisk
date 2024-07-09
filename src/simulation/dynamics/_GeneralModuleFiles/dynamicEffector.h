@@ -23,6 +23,7 @@
 #include <Eigen/Dense>
 #include "dynParamManager.h"
 #include "architecture/utilities/bskLogging.h"
+#include "architecture/messaging/messaging.h"
 
 /*! @brief dynamic effector class */
 class DynamicEffector {
@@ -39,6 +40,7 @@ public:
     Eigen::Vector3d forceExternal_B = Eigen::Vector3d::Zero();      //!< [N] External force applied by this effector in body frame components
     Eigen::Vector3d torqueExternalPntB_B = Eigen::Vector3d::Zero(); //!< [Nm] External torque applied by this effector
     BSKLogger bskLogger;                    //!< -- BSK Logging
+    
 };
 
 

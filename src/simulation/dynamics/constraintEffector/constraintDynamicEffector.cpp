@@ -140,8 +140,8 @@ void ConstraintDynamicEffector::linkInStates(DynParamManager& states)
 
 /*! This method computes the forces on torques on each spacecraft body.
  @return void
- @param integTime Integration time
- @param timeStep Current integration time step used
+ @param integTime 
+ @param timeStep
  */
 void ConstraintDynamicEffector::computeForceTorque(double integTime, double timeStep)
 {
@@ -213,10 +213,27 @@ void ConstraintDynamicEffector::computeForceTorque(double integTime, double time
     }
 }
 
+/*! This method takes the computed constraint force and torque states and outputs them to the m
+ messaging system.
+ @return void
+ @param CurrentClock The current simulation time (used for time stamping)
+ */
+void ConstraintDynamicEffector::writeOutputStateMessage(uint64_t CurrentClock)
+{
+    ConstDynEffectorMsgPayload outputForces;
+    outputForces = this->constraintForceB.zeroMsgPayload;
+    eigenVector3d2CArray(this->forceExternal_N,outputForces.Fc_N);
+    eigenVector3d2CArray(this->torqueExternalPntB_B,outputForces.L_B);
+    this->constraintForceB.write(&outputForces,this->moduleID,CurrentClock);
+}
+
 /*! Update state method, nothing to report here
  @return void
+ @param CurrentSimNanos current simulation time
  */
 void ConstraintDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
 {
-
+    this->writeOutputStateMessage(CurrentSimNanos);
+    
+    return;
 }
