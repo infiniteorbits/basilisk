@@ -367,7 +367,7 @@ def constraintEffectorRotationalConservation(show_plots):
     # Record the spacecraft state message
     datLog1 = scObject1.scStateOutMsg.recorder()
     datLog2 = scObject2.scStateOutMsg.recorder()
-    dataLog3 = constraintEffector.constraintForceB.recorder()
+    dataLog3 = constraintEffector.constraintElements.recorder()
     unitTestSim.AddModelToTask(unitTaskName, datLog1)
     unitTestSim.AddModelToTask(unitTaskName, datLog2)
     unitTestSim.AddModelToTask(unitTaskName, dataLog3)

@@ -221,10 +221,10 @@ void ConstraintDynamicEffector::computeForceTorque(double integTime, double time
 void ConstraintDynamicEffector::writeOutputStateMessage(uint64_t CurrentClock)
 {
     ConstDynEffectorMsgPayload outputForces;
-    outputForces = this->constraintForceB.zeroMsgPayload;
+    outputForces = this->constraintElements.zeroMsgPayload;
     eigenVector3d2CArray(this->forceExternal_N,outputForces.Fc_N);
     eigenVector3d2CArray(this->torqueExternalPntB_B,outputForces.L_B);
-    this->constraintForceB.write(&outputForces,this->moduleID,CurrentClock);
+    this->constraintElements.write(&outputForces,this->moduleID,CurrentClock);
 }
 
 /*! Update state method, nothing to report here

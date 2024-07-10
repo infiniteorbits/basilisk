@@ -85,7 +85,7 @@ public:
 
 public:
 
-    Message<ConstDynEffectorMsgPayload> constraintForceB;
+    Message<ConstDynEffectorMsgPayload> constraintElements;
 
 private:
     // Counters and flags
