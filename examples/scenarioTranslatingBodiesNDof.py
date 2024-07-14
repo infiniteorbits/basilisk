@@ -45,7 +45,7 @@ def plotArmTimeHistory(timeData, rho, rhoDot):
     for idx, disp in enumerate(rho):
         plt.plot(timeData, disp, label=r'$\rho_' + str(idx+1) + '$')
     plt.legend(fontsize='14')
-    plt.title('Displacements', fontsize='22')
+    # plt.title('Displacements', fontsize='22')
     plt.xlabel('time [min]', fontsize='18')
     plt.ylabel(r'$\rho$ [m]', fontsize='18')
     plt.xticks(fontsize=14)
@@ -57,7 +57,7 @@ def plotArmTimeHistory(timeData, rho, rhoDot):
     for idx, velo in enumerate(rhoDot):
         plt.plot(timeData, velo, label=r'$\dot{\rho}_' + str(idx + 1) + '$')
     plt.legend(fontsize='14')
-    plt.title('Displacement Rates', fontsize='22')
+    # plt.title('Displacement Rates', fontsize='22')
     plt.xlabel('time [min]', fontsize='18')
     plt.ylabel(r'$\dot{\rho}$ [m/s]', fontsize='18')
     plt.xticks(fontsize=14)
@@ -73,7 +73,7 @@ def plotSCStates(timeData, attLog, omegaLog):
                  color=unitTestSupport.getLineColor(idx, 3),
                  label=r'$\sigma_' + str(idx) + '$')
     plt.legend(fontsize='14')
-    plt.title('Attitude', fontsize='22')
+    # plt.title('Attitude', fontsize='22')
     plt.xlabel('time [min]', fontsize='18')
     plt.ylabel(r'$\sigma_{B/N}$', fontsize='18')
     plt.xticks(fontsize=14)
@@ -91,9 +91,9 @@ def plotSCStates(timeData, attLog, omegaLog):
              label=r'$|\mathbf{\omega}|$',
              linestyle='dashed')
     plt.legend(fontsize='14')
-    plt.title('Attitude Rate', fontsize='22')
+    # plt.title('Attitude Rate', fontsize='22')
     plt.xlabel('time [min]', fontsize='18')
-    plt.ylabel(r'$\omega_{B/N}$', fontsize='18')
+    plt.ylabel(r'$\omega_{B/N}$ [rad/s]', fontsize='18')
     plt.xticks(fontsize=14)
     plt.yticks(fontsize=14)
     ax.yaxis.offsetText.set_fontsize(14)
