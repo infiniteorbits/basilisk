@@ -24,6 +24,8 @@
 typedef struct{
     double Fc_N[3]; // Constraint force applied in Inertial frame
     double L_B[3]; //Constraint torque applied in Inertial frame
+    double psi_N[3]; // Length constraint violation
+    double F_filtered = 0.0; //Filtered constraint force applied in Inertial frame
 }ConstDynEffectorMsgPayload;
 
 #endif

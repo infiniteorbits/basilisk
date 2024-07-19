@@ -30,6 +30,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
+//#include "architecture/msgPayloadDefC/SimulationStopTimeMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 // #include <iostream>
 // #include <cstring>
@@ -44,6 +45,8 @@ public:
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputStateMessage(uint64_t CurrentClock);
+    //void readSimulationStopTime();
+    void computeFilteredState(uint64_t CurrentClock);
 
     /** setter for `r_P2P1_B1Init` initial spacecraft separation */
     void setR_P2P1_B1Init(Eigen::Vector3d r_P2P1_B1Init);
@@ -65,7 +68,6 @@ public:
     void setC_a(double c_a);
     /** setter for `a,b,s,c,d,e` coefficients of low pass filter */
     void setFilter_Data(double h, double wc);
-    //void setToggle(int value);
 
     /** getter for `r_P2P1_B1Init` initial spacecraft separation */
     Eigen::Vector3d getR_P2P1_B1Init() const {return this->r_P2P1_B1Init;};
@@ -89,10 +91,11 @@ public:
 public:
 
     Message<ConstDynEffectorMsgPayload> constraintElements;
+    //ReadFunctor<SimulationStopTimeMsgPayload> SimulationStopTimeInMsg;
 
 private:
 
-    ConstDynEffectorConnMsgPayload ConstDynEffectorConnBuffer;
+    //SimulationStopTimeMsgPayload SimulationStopTimeBuffer;
     // Counters and flags
     int scInitCounter = 0; //!< counter to kill simulation if more than two spacecraft initialized
     int scID = 1; //!< 0,1 alternating spacecraft tracker to output appropriate force/torque
@@ -122,20 +125,6 @@ private:
     double F_filtered_mag_t = 0.0; //!< Magnitude of filtered constraint force at t time step
     double F_filtered_mag_tminus1 = 0.0; //!< Magnitude of filtered constraint force at t-1 time step
     double F_filtered_mag_tminus2 = 0.0; //!< Magnitude of filtered constraint force at t-2 time step
-
-    double T1_mag_tminus2 = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 1 at t-2 time step
-    double T1_mag_tminus1 = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 1 at t-1 time step
-    double T1_mag_t = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 1 at t time step
-    double T1_filtered_mag_t = 0.0; //!< Magnitude of filtered constraint torque on s/c 1 at t time step
-    double T1_filtered_mag_tminus1 = 0.0; //!< Magnitude of filtered constraint torque on s/c 1 at t-1 time step
-    double T1_filtered_mag_tminus2 = 0.0; //!< Magnitude of filtered constraint torque on s/c 1 at t-2 time step
-
-    double T2_mag_tminus2 = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 2 at t-2 time step
-    double T2_mag_tminus1 = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 2at t-1 time step
-    double T2_mag_t = 0.0; //!< Magnitude of unfiltered constraint torque on s/c 2 at t time step
-    double T2_filtered_mag_t = 0.0; //!< Magnitude of filtered constraint torque on s/c 2 at t time step
-    double T2_filtered_mag_tminus1 = 0.0; //!< Magnitude of filtered constraint torque on s/c 2 at t-1 time step
-    double T2_filtered_mag_tminus2 = 0.0; //!< Magnitude of filtered constraint torque on s/c 2 at t-2 time step
 
     // Simulation variable pointers
     std::vector<StateData*> hubPosition;    //!< [m] parent inertial position vector
