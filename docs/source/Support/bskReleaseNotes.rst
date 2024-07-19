@@ -27,6 +27,7 @@ Basilisk Release Notes
     - spacecraft charging related modules
     - support a way to do thread-safe messaging
     - automated documentation build system when code is pushed to the repo
+    - `pip`-based installation and pre-compiled releases
 
 
 Version |release|
@@ -71,6 +72,10 @@ Version |release|
 - Fixed use of spherical coordinate system in :ref:`magneticFieldWMM` model.
 - Added ability to run the GitHub ``pull_request.yml`` action on a select branch
 - Fixed mass depletion rate bug in :ref:`thrusterStateEffector` previously fixed at 100%
+- Added PEP-517-compliant project specification, providing initial support for installation via `pip install .`.
+
+  - NOTE: This is primarily intended to support pre-compiled releases in the future. All users are recommended to continue
+    using `python conanfile.py` installation for now.
 
 
 Version 2.3.0 (April 5, 2024)
