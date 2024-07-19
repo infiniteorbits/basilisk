@@ -42,6 +42,9 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
 struct ConstDynEffectorMsg_C;
 
+//%include "architecture/msgPayloadDefC/SimulationStopTimeMsgPayload.h"
+//struct SimulationStopTimeMsg_C;
+
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])
