@@ -22,6 +22,7 @@
 
 #include <Eigen/Dense>
 #include "simulation/dynamics/_GeneralModuleFiles/stateEffector.h"
+#include "simulation/dynamics/_GeneralModuleFiles/dynamicEffector.h"
 #include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/avsEigenMRP.h"
@@ -45,6 +46,10 @@ public:
     double thetaDotInit = 0.0;                                       //!< [rad/s] initial spinning body angle rate
     std::string nameOfThetaState;                                    //!< -- identifier for the theta state data container
     std::string nameOfThetaDotState;                                 //!< -- identifier for the thetaDot state data container
+    std::string nameOfInertialPositionProperty;
+    std::string nameOfInertialVelocityProperty;
+    std::string nameOfInertialAttitudeProperty;
+    std::string nameOfInertialAngVelocityProperty;
     Eigen::Vector3d r_SB_B{0.0, 0.0, 0.0};                  //!< [m] vector pointing from body frame B origin to spinning frame S origin in B frame components
     Eigen::Vector3d r_ScS_S{0.0, 0.0, 0.0};                 //!< [m] vector pointing from spinning frame S origin to point Sc (center of mass of the spinner) in S frame components
     Eigen::Vector3d sHat_S{1.0, 0.0, 0.0};                  //!< -- spinning axis in S frame components.
@@ -55,6 +60,7 @@ public:
     ReadFunctor<ArrayMotorTorqueMsgPayload> motorTorqueInMsg;        //!< -- (optional) motor torque input message
     ReadFunctor<ArrayEffectorLockMsgPayload> motorLockInMsg;         //!< -- (optional) motor lock flag input message
     ReadFunctor<HingedRigidBodyMsgPayload> spinningBodyRefInMsg;     //!< -- (optional) spinning body reference input message name
+    std::vector<DynamicEffector*> dynEffectors;                      //!< Vector of dynamic effectors attached to dynObject
 
     SpinningBodyOneDOFStateEffector();  //!< -- Contructor
     ~SpinningBodyOneDOFStateEffector() override; //!< -- Destructor
@@ -63,6 +69,8 @@ public:
     void UpdateState(uint64_t CurrentSimNanos) override;             //!< -- Method for updating information
     void registerStates(DynParamManager& statesIn) override;         //!< -- Method for registering the SB states
     void linkInStates(DynParamManager& states) override;             //!< -- Method for getting access to other states
+    void addDynamicEffector(DynamicEffector *newDynamicEffector);
+    void registerProperties(DynParamManager& states) override;
     void updateContributions(double integTime,
                              BackSubMatrices& backSubContr, Eigen::Vector3d sigma_BN,
                              Eigen::Vector3d omega_BN_B, Eigen::Vector3d g_N) override;   //!< -- Method for back-substitution contributions
@@ -80,6 +88,30 @@ private:
     int lockFlag = 0;                   //!< [] flag for locking the rotation axis
     double thetaRef = 0.0;              //!< [rad] spinning body reference angle
     double thetaDotRef = 0.0;           //!< [rad] spinning body reference angle rate
+
+    template <typename Type>
+    /** Assign the state engine state and parameter names to an effector */
+    void assignStateParamNames(Type effector) {
+        /* assign the state engine names for the parent rigid body states */
+//        effector->setStateNameOfPosition(this->hub.nameOfHubPosition);
+//        effector->setStateNameOfVelocity(this->hub.nameOfHubVelocity);
+//        effector->setStateNameOfSigma(this->hub.nameOfHubSigma);
+//        effector->setStateNameOfOmega(this->hub.nameOfHubOmega);
+
+        /* assign the state engine names for the parent rigid property values */
+//        effector->setPropName_m_SC(this->propName_m_SC);
+//        effector->setPropName_mDot_SC(this->propName_mDot_SC);
+//        effector->setPropName_centerOfMassSC(this->propName_centerOfMassSC);
+//        effector->setPropName_inertiaSC(this->propName_inertiaSC);
+//        effector->setPropName_inertiaPrimeSC(this->propName_inertiaPrimeSC);
+//        effector->setPropName_centerOfMassPrimeSC(this->propName_centerOfMassPrimeSC);
+//        effector->setPropName_centerOfMassDotSC(this->propName_centerOfMassDotSC);
+        effector->setPropName_inertialPosition(this->nameOfInertialPositionProperty);
+        effector->setPropName_inertialVelocity(this->nameOfInertialVelocityProperty);
+        effector->setPropName_inertialAttitude(this->nameOfInertialAttitudeProperty);
+        effector->setPropName_inertialAngVelocity(this->nameOfInertialAngVelocityProperty);
+//        effector->setPropName_vehicleGravity(this->gravField.vehicleGravityPropName);
+    };
 
     // Terms needed for back substitution
     Eigen::Vector3d aTheta{0.0, 0.0, 0.0};             //!< -- rDDot_BN term for back substitution
@@ -112,6 +144,12 @@ private:
     Eigen::Vector3d v_ScN_N{0.0, 0.0, 0.0};            //!< [m/s] inertial velocity vector of Sc relative to inertial frame
     Eigen::Vector3d sigma_SN{0.0, 0.0, 0.0};           //!< -- MRP attitude of frame S relative to inertial frame
     Eigen::Vector3d omega_SN_S{0.0, 0.0, 0.0};         //!< [rad/s] inertial spinning body frame angular velocity vector
+
+    // Spinning body real properties
+    Eigen::MatrixXd *r_ScN_N_prop;            //!< [m] position vector of spinning body center of mass Sc relative to the inertial frame origin N
+    Eigen::MatrixXd *v_ScN_N_prop;            //!< [m/s] inertial velocity vector of Sc relative to inertial frame
+    Eigen::MatrixXd *sigma_SN_prop;           //!< -- MRP attitude of frame S relative to inertial frame
+    Eigen::MatrixXd *omega_SN_S_prop;         //!< [rad/s] inertial spinning body frame angular velocity vector
 
     // States
     double theta = 0.0;                           //!< [rad] spinning body angle

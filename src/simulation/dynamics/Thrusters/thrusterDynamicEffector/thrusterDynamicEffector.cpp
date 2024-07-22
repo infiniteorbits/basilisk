@@ -175,11 +175,19 @@ void ThrusterDynamicEffector::ConfigureThrustRequests(double currentTime)
 void ThrusterDynamicEffector::UpdateThrusterProperties()
 {
     // Save hub variables
-    Eigen::Vector3d r_BN_N = (Eigen::Vector3d)*this->inertialPositionProperty;
-    Eigen::Vector3d omega_BN_B = this->hubOmega->getState();
     Eigen::MRPd sigma_BN;
-    sigma_BN = (Eigen::Vector3d)this->hubSigma->getState();
+    Eigen::Vector3d omega_BN_B;
+    if (!this->stateNameOfSigma.empty()) {
+        omega_BN_B = this->hubOmega->getState();
+        sigma_BN = (Eigen::Vector3d)this->hubSigma->getState();
+    }
+    else {
+        omega_BN_B = *this->inertialAngVelocityProperty;
+        sigma_BN = (Eigen::Vector3d)*this->inertialAttitudeProperty;
+    }
+
     Eigen::Matrix3d dcm_BN = (sigma_BN.toRotationMatrix()).transpose();
+    Eigen::Vector3d r_BN_N = (Eigen::Vector3d)*this->inertialPositionProperty;
 
     // Define the variables related to which body the thruster is attached to. The F frame represents the platform body where the thruster attaches to
     Eigen::MRPd sigma_FN;
@@ -229,6 +237,12 @@ void ThrusterDynamicEffector::linkInStates(DynParamManager& states){
     this->inertialPositionProperty = states.getPropertyReference(this->propName_inertialPosition);
 }
 
+void ThrusterDynamicEffector::linkInProperties(DynParamManager& states){
+    this->inertialAttitudeProperty = states.getPropertyReference(this->propName_inertialAttitude);
+    this->inertialAngVelocityProperty = states.getPropertyReference(this->propName_inertialAngVelocity);
+    this->inertialPositionProperty = states.getPropertyReference(this->propName_inertialPosition);
+}
+
 /*! This method computes the Forces on Torque on the Spacecraft Body.
  @return void
  @param integTime Integration time
@@ -237,7 +251,14 @@ void ThrusterDynamicEffector::linkInStates(DynParamManager& states){
 void ThrusterDynamicEffector::computeForceTorque(double integTime, double timeStep)
 {
     // Save omega_BN_B
-    Eigen::Vector3d omegaLocal_BN_B = this->hubOmega->getState();
+//    Eigen::Vector3d omegaLocal_BN_B = this->hubOmega->getState();
+    Eigen::Vector3d omegaLocal_BN_B;
+    if (!this->stateNameOfSigma.empty()) {
+        omegaLocal_BN_B = this->hubOmega->getState();
+    }
+    else {
+        omegaLocal_BN_B = *this->inertialAngVelocityProperty;
+    }
 
     // Force and torque variables
     Eigen::Vector3d SingleThrusterForce;

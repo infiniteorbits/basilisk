@@ -46,6 +46,7 @@ public:
     ThrusterDynamicEffector();
     ~ThrusterDynamicEffector();
     void linkInStates(DynParamManager& states);
+    void linkInProperties(DynParamManager& states);
     void computeForceTorque(double integTime, double timeStep);
     void computeStateContribution(double integTime);
     void Reset(uint64_t CurrentSimNanos);
@@ -59,7 +60,7 @@ public:
     void ComputeThrusterFire(THRSimConfig *CurrentThruster, double currentTime);
     void ComputeThrusterShut(THRSimConfig *CurrentThruster, double currentTime);
     void UpdateThrusterProperties();
-    
+
 
 public:
     ReadFunctor<THRArrayOnTimeCmdMsgPayload> cmdsInMsg;  //!< -- input message with thruster commands
@@ -75,6 +76,8 @@ public:
 	StateData *hubSigma;                           //!< pointer to the hub attitude states
     StateData *hubOmega;                           //!< pointer to the hub angular velocity states
     Eigen::MatrixXd* inertialPositionProperty;  //!< [m] r_N inertial position relative to system spice zeroBase/refBase
+    Eigen::MatrixXd* inertialAttitudeProperty;
+    Eigen::MatrixXd* inertialAngVelocityProperty;
 
     BSKLogger bskLogger;                      //!< -- BSK Logging
 
