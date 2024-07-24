@@ -23,9 +23,12 @@
 /*! @brief Structure used to Constraint Dynamic Effector output message */
 typedef struct{
     double Fc_N[3]; // Constraint force applied in Inertial frame
-    double L_B[3]; //Constraint torque applied in Inertial frame
+    double L_B1[3]; //Constraint torque applied on s/c 1 in Inertial frame
+    double L_B2[3]; //Constraint torque applied on s/c 2 in Inertial frame
     double psi_N[3]; // Length constraint violation
     double F_filtered = 0.0; //Filtered constraint force applied in Inertial frame
+    double T1_filtered = 0.0; //Filtered constraint torque on s/c 1 applied in Inertial frame
+    double T2_filtered = 0.0; //Filtered constraint torque on s/c 2 applied in Inertial frame
 }ConstDynEffectorMsgPayload;
 
 #endif
