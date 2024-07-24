@@ -30,8 +30,9 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
-#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
 #include "architecture/messaging/messaging.h"
+// #include <iostream>
+// #include <cstring>
 
 /*! @brief constraint dynamic effector class */
 class ConstraintDynamicEffector: public SysModel, public DynamicEffector {
@@ -43,9 +44,6 @@ public:
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputStateMessage(uint64_t CurrentClock);
-    void computeFilteredForce(uint64_t CurrentClock);
-    void computeFilteredTorque(uint64_t CurrentClock);
-    void readInputMessage();
 
     /** setter for `r_P2P1_B1Init` initial spacecraft separation */
     void setR_P2P1_B1Init(Eigen::Vector3d r_P2P1_B1Init);
@@ -89,9 +87,7 @@ public:
 
 public:
 
-    Message<ConstDynEffectorMsgPayload> constraintElements; //!< output message with constraint force and torque on connected s/c
-    ReadFunctor<DeviceStatusMsgPayload> effectorStatusInMsg; //!< input message to record device status
-    uint64_t effectorStatus=1; //!< internal variable to toggle effector status
+    Message<ConstDynEffectorMsgPayload> constraintElements;
 
 private:
 

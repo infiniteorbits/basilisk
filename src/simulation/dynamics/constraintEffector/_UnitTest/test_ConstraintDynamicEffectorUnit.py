@@ -376,7 +376,6 @@ def constraintEffectorRotationalConservation(show_plots):
     unitTestSim.AddModelToTask(unitTaskName, datLog1)
     unitTestSim.AddModelToTask(unitTaskName, datLog2)
     unitTestSim.AddModelToTask(unitTaskName, dataLog3)
-    unitTestSim.AddModelToTask(unitTaskName, dataLog3)
 
     # Log energy and momentum variables
     conservationData1 = scObject1.logger(["totRotAngMomPntC_N", "totRotEnergy"])
@@ -403,12 +402,16 @@ def constraintEffectorRotationalConservation(show_plots):
     sigma_B2N_hist = datLog2.sigma_BN
     omega_B2N_B2_hist = datLog2.omega_BN_B
 
+    Fc_N = dataLog3.Fc_N
+    L_B = dataLog3.L_B
+
     # collect the logged conservation variables
     conservationTimeData = conservationData1.times() * macros.NANO2SEC
     rotAngMom1PntC1_N = conservationData1.totRotAngMomPntC_N
     rotEnergy1 = conservationData1.totRotEnergy
     rotAngMom2PntC2_N = conservationData2.totRotAngMomPntC_N
     rotEnergy2 = conservationData2.totRotEnergy
+
 
     # Compute constraint violations
     r_B1N_B1 = np.empty(r_B1N_N_hist.shape)
@@ -462,7 +465,27 @@ def constraintEffectorRotationalConservation(show_plots):
     plt.ylabel(r'relative attitude angle: $\phi$ (deg)')
     plt.title('Attitude Constraint Violation Components')
 
-    plt.figure(3)
+    plt.figure()
+    plt.clf()
+    for i in range(3):
+        plt.semilogy(constraintTimeData, np.abs(Fc_N[:, i]))
+    plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N,axis=1))
+    plt.legend([r'$FcN_1$',r'$FcN_2$',r'$FcN_3$',r'$FcN$ magnitude'])
+    plt.xlabel('time (seconds)')
+    plt.ylabel(r'Constraint force: $FcN$ (N)')
+    plt.title('Constraint Force')
+
+    plt.figure()
+    plt.clf()
+    for i in range(3):
+        plt.semilogy(constraintTimeData, np.abs(L_B[:, i]))
+    plt.semilogy(constraintTimeData, np.linalg.norm(L_B,axis=1))
+    plt.legend([r'$L_1$',r'$L_2$',r'$L_3$',r'$L$ magnitude'])
+    plt.xlabel('time (seconds)')
+    plt.ylabel(r'Constraint torque: $L$ (N.m)')
+    plt.title('Constraint torque')
+
+    plt.figure()
     plt.clf()
     plt.plot(conservationTimeData, (combinedRotAngMom[:,0] - combinedRotAngMom[0,0])/combinedRotAngMom[0,0],
              conservationTimeData, (combinedRotAngMom[:,1] - combinedRotAngMom[0,1])/combinedRotAngMom[0,1],
