@@ -125,11 +125,11 @@ def constraintEffectorInOutMessageFiltering(show_plots):
     constraintEffector.setAlpha(alpha)
     constraintEffector.setBeta(beta)
     constraintEffector.setFilter_Data(h,wc) #0.09
-    
+
     # Add constraints to both spacecraft
     scObject1.addDynamicEffector(constraintEffector)
     scObject2.addDynamicEffector(constraintEffector)
-    
+
     # Add test module to runtime call list
     unitTestSim.AddModelToTask(unitTaskName, scObject1)
     unitTestSim.AddModelToTask(unitTaskName, scObject2)
@@ -357,6 +357,6 @@ def constraintEffectorInOutMessageFiltering(show_plots):
     #                                err_msg='rotational angular momentum difference component magnitude exceeded')
     # np.testing.assert_allclose(rotEnergy1+rotEnergy2, rotEnergy1[0]+rotEnergy2[0], atol=accuracy,
     #                            err_msg='rotational energy difference magnitude exceeded')
-    
+
 if __name__ == "__main__":
     constraintEffectorInOutMessageFiltering(True)
