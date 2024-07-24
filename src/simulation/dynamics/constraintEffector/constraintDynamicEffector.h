@@ -30,7 +30,6 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
-#include "architecture/msgPayloadDefC/ConstDynEffectorConnMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 // #include <iostream>
 // #include <cstring>
@@ -45,10 +44,6 @@ public:
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputStateMessage(uint64_t CurrentClock);
-    //void readSimulationStopTime();
-    void computeFilteredForce(uint64_t CurrentClock);
-    void computeFilteredTorque(uint64_t CurrentClock);
-    void readInputMessage();
 
     /** setter for `r_P2P1_B1Init` initial spacecraft separation */
     void setR_P2P1_B1Init(Eigen::Vector3d r_P2P1_B1Init);
@@ -93,8 +88,7 @@ public:
 
 public:
 
-    Message<ConstDynEffectorMsgPayload> constraintElements;
-    ReadFunctor<ConstDynEffectorConnMsgPayload> ConstDynEffectorConnInMsg;
+    Message<ConstDynEffectorMsgPayload> constraintForceB;
 
 private:
 
