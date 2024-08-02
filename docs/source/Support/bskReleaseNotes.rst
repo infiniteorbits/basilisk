@@ -70,6 +70,15 @@ Version |release|
 - Added support for numpy 2.0.
 - Fixed use of spherical coordinate system in :ref:`magneticFieldWMM` model.
 - Added ability to run the GitHub ``pull_request.yml`` action on a select branch
+- Added a Lambert's problem based FSW package to compute the DV maneuver required to get to a desired location at a
+  desired time. At that location, another maneuver may be performed to match the surface velocity of a celestial body.
+  This FSW package consists of the modules :ref:`lambertSolver` to solve Lambert's problem, :ref:`lambertPlanner` to
+  set up and define the Lambert problem, :ref:`lambertValidator` to check if the solution from the :ref:`lambertSolver`
+  module violates any constraints before a Delta-V is commanded, :ref:`lambertSurfaceRelativeVelocity` to compute the
+  inertial velocity required to match the surface velocity of the central body, and :ref:`lambertSecondDV` to compute
+  the DV maneuver required to match the surface velocity.
+- Added :ref:`scenarioLambertSolver` scenario to illustrate the Lambert's problem FSW module package
+- Added :ref:`scenario_LambertGuidance` BSK-Sim scenario to illustrate the Lambert modules in different flight modes
 
 
 Version 2.3.0 (April 5, 2024)
