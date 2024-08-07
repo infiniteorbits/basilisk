@@ -3,12 +3,12 @@
 
 .. _pipInstall:
 
-Advanced: Building and installing pre-compiled Basilisk wheels
-==============================================================
+Advanced: (Beta) Building and Installing Pre-Compiled Basilisk Wheels
+=====================================================================
 
 .. warning::
 
-    This method of building Basilisk is currently Work-In-Progress, and should only be attempted by advanced users
+    This method of building Basilisk is currently a beta feature, and should only be attempted by advanced users
     familiar with `Python packaging and distribution
     <https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/>`_.
     This method is not yet guaranteed to work on every platform, and there are still some annoyances
@@ -17,20 +17,21 @@ Advanced: Building and installing pre-compiled Basilisk wheels
     Most users should see :ref:`configureBuild` for documentation on the regular build process.
 
 
-Building & Installing with ``pip``
-----------------------------------
+Building and Installing with ``pip``
+------------------------------------
 
 .. note::
 
     All commands are called from the Basilisk root directory.
 
-Basilisk can be built and installed using standard Python packaging tools[#f1] such as ``pip``.
+A clean Basilisk wheel can be built and installed using standard Python packaging tools[#f1] such as ``pip``.
+Note that this will always result in a clean build.
 The simplest usage is::
 
     pip install -v .
 
-This command compiles and installs Basilisk into the user's current Python environment. (Note: the ``-v`` flag is
-added to display verbose compilation messages, otherwise it can look like the installation process is stuck.)
+This command compiles and installs Basilisk into the user's current Python environment. Note that the optional ``-v`` flag is
+added to display verbose compilation messages, otherwise it can look like the installation process is stuck.
 
 Build options (as passed to ``conanfile.py`` and described in :ref:`configureBuild`) can be provided using the
 ``CONAN_ARGS`` environment variable::
