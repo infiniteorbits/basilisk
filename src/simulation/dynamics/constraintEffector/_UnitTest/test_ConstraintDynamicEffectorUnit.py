@@ -403,15 +403,6 @@ def constraintEffectorRotationalConservation(show_plots):
     sigma_B2N_hist = datLog2.sigma_BN
     omega_B2N_B2_hist = datLog2.omega_BN_B
 
-    Fc_N = dataLog3.Fc_N
-    L_B1 = dataLog3.L_B1
-    L_B2 = dataLog3.L_B2
-    psi_N = dataLog3.psi_N
-    F_filtered = dataLog3.F_filtered
-    T1_filtered = dataLog3.T1_filtered
-    T2_filtered = dataLog3.T2_filtered
-    print(T1_filtered)
-
     # collect the logged conservation variables
     conservationTimeData = conservationData1.times() * macros.NANO2SEC
     rotAngMom1PntC1_N = conservationData1.totRotAngMomPntC_N

@@ -30,10 +30,8 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
-#include "architecture/msgPayloadDefC/ConstDynEffectorConnMsgPayload.h"
+#include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
 #include "architecture/messaging/messaging.h"
-// #include <iostream>
-// #include <cstring>
 
 /*! @brief constraint dynamic effector class */
 class ConstraintDynamicEffector: public SysModel, public DynamicEffector {
@@ -45,7 +43,6 @@ public:
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputStateMessage(uint64_t CurrentClock);
-    //void readSimulationStopTime();
     void computeFilteredForce(uint64_t CurrentClock);
     void computeFilteredTorque(uint64_t CurrentClock);
     void readInputMessage();
@@ -70,7 +67,6 @@ public:
     void setC_a(double c_a);
     /** setter for `a,b,s,c,d,e` coefficients of low pass filter */
     void setFilter_Data(double h, double wc);
-    //void setToggle(int value);
 
     /** getter for `r_P2P1_B1Init` initial spacecraft separation */
     Eigen::Vector3d getR_P2P1_B1Init() const {return this->r_P2P1_B1Init;};
@@ -94,11 +90,12 @@ public:
 public:
 
     Message<ConstDynEffectorMsgPayload> constraintElements;
-    ReadFunctor<ConstDynEffectorConnMsgPayload> ConstDynEffectorConnInMsg;
+    ReadFunctor<DeviceStatusMsgPayload> effectorStatusInMsg;
+    uint64_t effectorStatus=1;
 
 private:
 
-    ConstDynEffectorConnMsgPayload ConstDynEffectorConnBuffer;
+    //ConstDynEffectorConnMsgPayload ConstDynEffectorConnBuffer;
     // Counters and flags
     int scInitCounter = 0; //!< counter to kill simulation if more than two spacecraft initialized
     int scID = 1; //!< 0,1 alternating spacecraft tracker to output appropriate force/torque
