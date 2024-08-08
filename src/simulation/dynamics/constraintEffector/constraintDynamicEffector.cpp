@@ -123,17 +123,10 @@ void ConstraintDynamicEffector::setC_a(double c_a) {
     }
 }
 
-// void ConstraintDynamicEffector::setToggle(int value) {
-    
-//     this->check = value;
-//     // else {
-//     //     bskLogger.bskLog(BSK_ERROR, "Attitude constraint derivative gain c_a must be greater than 0.");
-//     // }
-// }
-
 /*Function to set the coefficients of a numerical low pass filtering mechanism*/
 
 void ConstraintDynamicEffector::setFilter_Data(double h, double wc){
+    if (wc>0){
     double k = 0.7;
     std::array<double,3> num_coeffs = {pow(wc*h,2),2*pow(wc*h,2),pow(wc*h,2)};
     std::array<double,3> denom_coeffs = {-4+4*k*h-pow(wc*h,2),8-2*pow(wc*h,2),4+4*k*h+pow(wc*h,2)};
@@ -142,17 +135,23 @@ void ConstraintDynamicEffector::setFilter_Data(double h, double wc){
     this->c = num_coeffs[2]/denom_coeffs[2];
     this->d = num_coeffs[1]/denom_coeffs[2];
     this->e = num_coeffs[0]/denom_coeffs[2];
+    }
+    else{
+        bskLogger.bskLog(BSK_ERROR, "Cut off frequency of low pass filter w_c must be greater than 0.");
+    }
 }
 
 void ConstraintDynamicEffector::readInputMessage(){
-     if(this->ConstDynEffectorConnInMsg.isLinked()){
-         this->ConstDynEffectorConnBuffer = this->ConstDynEffectorConnInMsg();
-         if(this->ConstDynEffectorConnBuffer.value == 1){
-            this->check = 1;
-         }
+     if(this->effectorStatusInMsg.isLinked()){
+        DeviceStatusMsgPayload statusMsg;
+        statusMsg = this->effectorStatusInMsg();
+        this->effectorStatus = statusMsg.deviceStatus;
      }
- }
-
+     else{
+        this->effectorStatus = 1;
+     }
+}
+         
 /*! This method allows the constraint effector to have access to the parent states
  @return void
  @param states The states to link
@@ -178,8 +177,7 @@ void ConstraintDynamicEffector::linkInStates(DynParamManager& states)
  */
 void ConstraintDynamicEffector::computeForceTorque(double integTime, double timeStep)
 {
-    this->readInputMessage();
-    if ((this->scInitCounter == 2) && (this->check == 1)) { // only proceed once both spacecraft are added
+    if ((this->scInitCounter == 2)) { // only proceed once both spacecraft are added
         // alternate assigning the constraint force and torque
         
         if (this->scID == 0) { // compute all forces and torques once, assign to spacecraft 1 and store for spacecraft 2
@@ -239,15 +237,13 @@ void ConstraintDynamicEffector::computeForceTorque(double integTime, double time
             // assign forces and torques for spacecraft 1
             this->forceExternal_N = this->Fc_N;
             this->torqueExternalPntB_B = L_B1_len + L_B1_att;
-            this->T_B1 = this->torqueExternalPntB_B;
-            //this->computeFilteredTorque();       
+            this->T_B1 = this->torqueExternalPntB_B;       
         }
         else if (this->scID == 1) {
             // assign forces and torques for spacecraft 2
             this->forceExternal_N = - this->Fc_N;
             this->torqueExternalPntB_B = this->L_B2;
             this->T_B2 = this->torqueExternalPntB_B;
-            //this->computeFilteredTorque();
         }
         this->scID = (1 + pow(-1,this->scID))/2; // toggle spacecraft to be assigned forces and torques
     }
@@ -278,11 +274,12 @@ void ConstraintDynamicEffector::writeOutputStateMessage(uint64_t CurrentClock)
  */
 void ConstraintDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
 {
-    //this->readSimulationStopTime();
-    this->computeForceTorque(1.,1.);
+    this->readInputMessage();
+    if(this->effectorStatus){
     this->computeFilteredForce(CurrentSimNanos);
     this->computeFilteredTorque(CurrentSimNanos);
     this->writeOutputStateMessage(CurrentSimNanos);
+    }
     
     return;
 }
