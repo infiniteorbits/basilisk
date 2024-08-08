@@ -42,8 +42,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
 struct ConstDynEffectorMsg_C;
 
-%include "architecture/msgPayloadDefC/ConstDynEffectorConnMsgPayload.h"
-struct ConstDynEffectorConnMsg_C;
+%include "architecture/msgPayloadDefC/DeviceStatusMsgPayload.h"
 
 %pythoncode %{
 import sys
