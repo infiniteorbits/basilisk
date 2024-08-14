@@ -19,7 +19,7 @@
 #   Module Name:        constraintEffector
 #   Author:             Ananya Kodukula
 #   Creation Date:      July 19, 2024
-
+#
 
 import inspect
 import os
@@ -44,8 +44,28 @@ from Basilisk.architecture import messaging
     (0,1)]) #Zero cut off frequency test
 
 def test_constraintEffectorAllCases(show_plots,CutOffFreq,useConstEffector):
-    [testFailCount,testMessages] = constraintEffectorInOutMessageFiltering(show_plots,CutOffFreq,useConstEffector)
-    assert testFailCount<1, testMessages
+    r"""Module Unit Test
+    **Validation Test Description**
+
+    This unit test sets up two spacecraft connected by a holonomic constraint effector acting as a physical connection
+    between them. The two spacecraft are set up with an identical mass and symmetrical inertias. We test the on/off input 
+    message used to toggle the status of the holonomic constraint effector, along with the default 
+    case. We test the output message of the module, namely the constraint forces and torques acting on both spacecraft. Along 
+    with this we also test the low pass filter used to filter the ouptut messsage parameters.
+
+    **Description of the test**
+
+    In order to verify the values of the output message, we simulate the scenario and then mimic it in Python using the same 
+    parameters and compare the resulting values. The default status of the dynamic effector is ON. To verify the on/off 
+    status of the dynamic effector, we check that the output message parameters are equal to 0 if the effector is OFF or 
+    is approximately equal to the values calculated in Python if the effector is ON.
+
+    To verify the filtering, we employ a similar approach of simulating the scenario and mimicing it in Python. If the cut-off 
+    frequency supplied is 0, there is no filtering. If it is negative, an error message is thrown and no filtering is performed. 
+    If it is positive, then we perform a low-pass filtering of the constraint forces and torques using a second-order low pass 
+    filter, to provide the corresponding results.
+    """
+    constraintEffectorInOutMessageFiltering(show_plots,CutOffFreq,useConstEffector)
 
 def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
 
@@ -191,16 +211,14 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     T1_filtered_hist = dataLog3.T1_filtered
     T2_filtered_hist = dataLog3.T2_filtered
 
-    final_FcN_compare = np.empty(r_B1N_N_hist.shape)
-    final_filtered_FcN_compare = np.empty(r_B1N_N_hist.shape)
-    final_filtered_LB1_compare = np.empty(r_B1N_N_hist.shape)
-    final_filtered_LB2_compare = np.empty(r_B1N_N_hist.shape)
-    final_L_B1_compare = np.empty(r_B1N_N_hist.shape)
-    final_L_B2_compare = np.empty(r_B1N_N_hist.shape)
-    final_psi_compare = np.empty(r_B1N_N_hist.shape)
-    sigma_B2B1 = np.empty(r_B1N_N_hist.shape)
-
-    print(np.linalg.norm(Fc_N_hist[-1,:]))
+    final_FcN_compare = np.zeros(r_B1N_N_hist.shape)
+    final_filtered_FcN_compare = np.zeros(r_B1N_N_hist.shape)
+    final_filtered_LB1_compare = np.zeros(r_B1N_N_hist.shape)
+    final_filtered_LB2_compare = np.zeros(r_B1N_N_hist.shape)
+    final_L_B1_compare = np.zeros(r_B1N_N_hist.shape)
+    final_L_B2_compare = np.zeros(r_B1N_N_hist.shape)
+    final_psi_compare = np.zeros(r_B1N_N_hist.shape)
+    sigma_B2B1 = np.zeros(r_B1N_N_hist.shape)
 
     if deviceStatus!=0:
 
@@ -343,6 +361,8 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     if show_plots:
         plt.show()
     plt.close("all")
+
+    print(final_psi_compare)
 
     accuracy = 1E-08
     np.testing.assert_allclose(final_psi_compare,0,atol = accuracy, err_msg = 'direction constraint output message norm is incorrect')

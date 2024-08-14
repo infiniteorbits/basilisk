@@ -123,11 +123,14 @@ void ConstraintDynamicEffector::setC_a(double c_a) {
     }
 }
 
-/*Function to set the coefficients of a numerical low pass filtering mechanism*/
-
-void ConstraintDynamicEffector::setFilter_Data(double h, double wc){
+/*! This method allows the user to set the cut-off frequency of the low pass filter which is then used to calculate the coefficients for numerical low pass filtering based on a second-order low pass filter design.
+ @return void
+ @param wc The cut-off frequency of the low pass filter.
+*/
+void ConstraintDynamicEffector::setFilter_Data(double wc){
     if (wc>0){
     double k = 0.7;
+    double h = 1.0;
     std::array<double,3> num_coeffs = {pow(wc*h,2),2*pow(wc*h,2),pow(wc*h,2)};
     std::array<double,3> denom_coeffs = {-4+4*k*h-pow(wc*h,2),8-2*pow(wc*h,2),4+4*k*h+pow(wc*h,2)};
     this->a = denom_coeffs[1]/denom_coeffs[2];
@@ -141,6 +144,9 @@ void ConstraintDynamicEffector::setFilter_Data(double h, double wc){
     }
 }
 
+/*! This method allows the user to set the status of the constraint dynamic effector
+ @return void
+*/
 void ConstraintDynamicEffector::readInputMessage(){
      if(this->effectorStatusInMsg.isLinked()){
         DeviceStatusMsgPayload statusMsg;
@@ -270,7 +276,7 @@ void ConstraintDynamicEffector::writeOutputStateMessage(uint64_t CurrentClock)
 
 /*! Update state method
  @return void
- @param CurrentSimNanos current simulation time
+ @param CurrentSimNanos The current simulation time
  */
 void ConstraintDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
 {
@@ -283,6 +289,7 @@ void ConstraintDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
     
     return;
 }
+
 /*! Filtering method to calculate filtered Constraint Force
  @return void
  @param CurrentClock The current simulation time (used for time stamping)
@@ -321,6 +328,5 @@ void ConstraintDynamicEffector::computeFilteredTorque(uint64_t CurrentClock)
         this->T2_filtered_mag_tminus2 = this->T2_filtered_mag_tminus1;
         this->T2_filtered_mag_tminus1 = this->T2_filtered_mag_t;
         this->T2_mag_tminus2 = this->T2_mag_tminus1;
-        this->T2_mag_tminus1 = this->T2_mag_t;
-    
+        this->T2_mag_tminus1 = this->T2_mag_t;   
 }
