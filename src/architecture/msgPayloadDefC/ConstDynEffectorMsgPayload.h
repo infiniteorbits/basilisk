@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2023, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2024, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -22,13 +22,13 @@
 
 /*! @brief Structure used to Constraint Dynamic Effector output message */
 typedef struct{
-    double Fc_N[3]; // Constraint force applied in Inertial frame
-    double L_B1[3]; //Constraint torque applied on s/c 1 in Inertial frame
-    double L_B2[3]; //Constraint torque applied on s/c 2 in Inertial frame
-    double psi_N[3]; // Length constraint violation
-    double F_filtered = 0.0; //Filtered constraint force applied in Inertial frame
-    double T1_filtered = 0.0; //Filtered constraint torque on s/c 1 applied in Inertial frame
-    double T2_filtered = 0.0; //Filtered constraint torque on s/c 2 applied in Inertial frame
+    double Fc_N[3]; //!< [N] Constraint force applied in Inertial frame
+    double L_B1[3]; //!< [N.m] Constraint torque applied on s/c 1 in Inertial frame
+    double L_B2[3]; //!< [N.m] Constraint torque applied on s/c 2 in Inertial frame
+    double psi_N[3]; //!< [m] Length constraint violation
+    double F_filtered = 0.0; //!< [N] Filtered constraint force applied in Inertial frame
+    double T1_filtered = 0.0; //!< [N.m] Filtered constraint torque on s/c 1 applied in Inertial frame
+    double T2_filtered = 0.0; //!< [N.m] Filtered constraint torque on s/c 2 applied in Inertial frame
 }ConstDynEffectorMsgPayload;
 
 #endif
