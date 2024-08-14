@@ -13,6 +13,27 @@ included test is validating the interaction between two spacecraft rigid body hu
 attached through a constraint effector. In this case, two identical spacecraft are connected
 by a 0.1 meter long arm which is enforced with high stiffness and damping to be virtually rigid.
 
+Message Connection Descriptions
+-------------------------------
+
+The following table lists all the module input and output messages.
+The module msg connection is set up by the user from python.
+The msg type provides a link to the message structure definition, while the description provides information on what this message is used for.
+
+.. list-table:: Module I/O Messages
+    :widths: 25 25 50
+    :header-rows: 1
+
+    * - Msg Variable Name
+      - Msg Type
+      - Description
+    * - deviceStatusInMsg
+      - :ref:`DeviceStatusMsgPayload`
+      - (optional) input message containing the device status
+    * - constDynEffectorOutMsg
+      - :ref:`ConstDynEffectorMsgPayload`
+      - output message with the raw and (optional)filtered constraint forces and torques
+
 Detailed Module Description
 ---------------------------
 
@@ -90,3 +111,16 @@ This section outlines the steps needed to setup a Constraint Dynamic Effector in
     constraintEffector.getC_d(2*beta)
     constraintEffector.getK_a(alpha**2)
     constraintEffector.getC_a(2*beta)
+
+#. (Optional) Define a input device status message.(1 means constraintEffector is connected.0 means constraintEffector is disconnected). If not set, it defaults to being connected::
+
+    effectorStatusMsgPayload = messaging.DeviceStatusMsgPayload()
+    effectorStatusMsgPayload.deviceStatus = 1
+    effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
+    constraintEffector.effectorStatusInMsg.subscribeTo(effectorStatusMsg)
+
+#. (Optional) Setup Low Pass Filtering for the Constraint Forces and Torques acting on the two satellites. Define a positive cut-off frequency wc for the low-pass filter. If not set, defaults to 0::
+
+    constraintEffector.setFilterData(wc)
+
+#. The constraintEffector output message records the raw and filtered constraint forces and torques acting on the two spacecraft using the variable ``constraintElements``.
