@@ -72,6 +72,7 @@ Version |release|
 - Fixed use of spherical coordinate system in :ref:`magneticFieldWMM` model.
 - Added ability to run the GitHub ``pull_request.yml`` action on a select branch
 - Fixed mass depletion rate bug in :ref:`thrusterStateEffector` previously fixed at 100%
+- Enhanced :ref:`thrusterDynamicEffector` to allow automatic scaling down of thrust and Isp as fuel mass depletes.
 - Enhanced :ref:`solarArrayReference` with a mode that can compute the reference for the solar arrays that maximizes SRP torque opposed to current RW net momentum.
 - (Beta) Added PEP-517-compliant project specification, providing initial support for installation via ``pip install .``.
 
