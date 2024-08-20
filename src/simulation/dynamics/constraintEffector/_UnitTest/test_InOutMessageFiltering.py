@@ -17,7 +17,7 @@
 #
 #   Unit Test Script
 #   Module Name:        constraintEffector
-#   Author:             João Vaz Carneiro and Andrew Morell and Ananya Kodukula
+#   Author:             Ananya Kodukula
 #   Creation Date:      July 19, 2024
 #
 
@@ -245,7 +245,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
             dcm_B2N = RigidBodyKinematics.MRP2C(sigma_B2N_hist[i,:])
             dcm_NB2 = np.transpose(RigidBodyKinematics.MRP2C(sigma_B2N_hist[i,:]))
             r_P2P1_N = dcm_NB2@r_P2B2_B2+r_B2N_N_hist[i,:]-dcm_NB1@r_P1B1_B1-r_B1N_N_hist[i,:]
-            #sigma_B2B1[i,:] = RigidBodyKinematics.subMRP(sigma_B2N_hist[i,:],sigma_B1N_hist[i,:])
             sigma_B2B1[i,:] = RigidBodyKinematics.C2MRP(dcm_B2N@dcm_NB1)
             rDot_P1B1_B1 = np.cross(omega_B1N_B1_hist[i,:],r_P1B1_B1)
             rDot_P2B2_B2 = np.cross(omega_B2N_B2_hist[i,:],r_P2B2_B2)
@@ -370,8 +369,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
         plt.show()
     plt.close("all")
 
-    print(final_psi_compare)
-
     accuracy = 1E-08
     np.testing.assert_allclose(final_psi_compare,0,atol = accuracy, err_msg = 'direction constraint output message norm is incorrect')
     np.testing.assert_allclose(final_FcN_compare,0,atol = accuracy, err_msg = 'constraint force output message norm is incorrect')
@@ -381,43 +378,19 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     np.testing.assert_allclose(final_filtered_LB1_compare,0,atol = accuracy, err_msg = 'filtered constraint torque on s/c 1 output message norm is incorrect')
     np.testing.assert_allclose(final_filtered_LB2_compare,0,atol = accuracy, err_msg = 'filtered constraint torque on s/c 2 output message norm is incorrect')
 
-    # testMessages = []
-    # testFailCount = 0
     if deviceStatus == 0:
         assert np.linalg.norm(Fc_N_hist[-1,:])==0,"deviceStatus 0 test case failed"
-        # if not np.linalg.norm(Fc_N_hist[-1,:])==0:
-        #     testFailCount+=1
-        #     testMessages.append('deviceStatus 0 test case failed')
     elif deviceStatus == -1:
         assert np.linalg.norm(Fc_N_hist[-1,:])==0,"deviceStatus -1 test case failed"
-        # if not np.linalg.norm(Fc_N_hist[-1,:])==0:
-        #     testFailCount+=1
-        #     testMessages.append('deviceStatus -1 test case failed')
     else:
         assert np.linalg.norm(Fc_N_hist[-1,:])>0,"deviceStatus 1 test case failed"
-        # if not np.linalg.norm(Fc_N_hist[-1,:])>0:
-        #     testFailCount+=1
-        #     testMessages.append('deviceStatus 1 test case failed')
-
-    
 
     if wc == 0.1 and deviceStatus == 1:
         assert F_filtered_hist[-1]>0,"positive cut off frequency test case failed"
-        # if not F_filtered_hist[-1]>0:
-        #     testFailCount+=1
-        #     testMessages.append('positive cut off frequency test case failed')
     elif wc == 0 and deviceStatus == 1:
         assert F_filtered_hist[-1]==0,"zero cut off frequency test case failed"
-        # if not F_filtered_hist[-1]==0:
-        #     testFailCount+=1
-        #     testMessages.append('zero cut off frequency test case failed')
     elif wc == -1 and deviceStatus == 1:
         assert F_filtered_hist[-1]==0,"negative cut off frequency test case failed"
-        # if not F_filtered_hist[-1]==0:
-        #     testFailCount+=1
-        #     testMessages.append('negative cut off frequency test case failed')
-    
-    #return [testFailCount, ''.join(testMessages)]
 
     
 if __name__ == "__main__":
