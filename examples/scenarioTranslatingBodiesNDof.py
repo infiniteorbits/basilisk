@@ -112,10 +112,9 @@ def run(show_plots):
     dynProcess = scSim.CreateNewProcess(dynrocessName)
 
     # Create the dynamics task and specify the integration update time
-    simulationTimeStep = macros.sec2nano(.01)
+    simulationTimeStep = macros.sec2nano(.1)
     dynProcess.addTask(scSim.CreateNewTask(dynTaskName, simulationTimeStep))
 
-    # todo: change number and draw up diagram
     # Define the spacecraft's properties
     scGeometry = geometryClass()
 
@@ -176,8 +175,8 @@ def run(show_plots):
     translatingBody1.setFHat_P([[0], [1], [0]])
     translatingBody1.setRhoInit(0.0)
     translatingBody1.setRhoDotInit(0.0)
-    translatingBody1.setC(3000.0)
-    translatingBody1.setK(500.0)
+    translatingBody1.setC(400.0)
+    translatingBody1.setK(100.0)
     translatingBodyEffector.addTranslatingBody(translatingBody1)
 
     # body 2
@@ -193,8 +192,8 @@ def run(show_plots):
     translatingBody2.setFHat_P([[0], [1], [0]])
     translatingBody2.setRhoInit(0.0)
     translatingBody2.setRhoDotInit(0.0)
-    translatingBody2.setC(3000.0)
-    translatingBody2.setK(500.0)
+    translatingBody2.setC(400.0)
+    translatingBody2.setK(100.0)
     translatingBodyEffector.addTranslatingBody(translatingBody2)
 
     profiler2 = prescribedLinearTranslation.PrescribedLinearTranslation()
@@ -226,8 +225,8 @@ def run(show_plots):
     translatingBody3.setFHat_P([[0], [1], [0]])
     translatingBody3.setRhoInit(0.0)
     translatingBody3.setRhoDotInit(0.0)
-    translatingBody3.setC(3000.0)
-    translatingBody3.setK(500.0)
+    translatingBody3.setC(400.0)
+    translatingBody3.setK(100.0)
     translatingBodyEffector.addTranslatingBody(translatingBody3)
 
     profiler3 = prescribedLinearTranslation.PrescribedLinearTranslation()
@@ -259,8 +258,8 @@ def run(show_plots):
     translatingBody4.setFHat_P([[0], [1], [0]])
     translatingBody4.setRhoInit(0.0)
     translatingBody4.setRhoDotInit(0.0)
-    translatingBody4.setC(3000.0)
-    translatingBody4.setK(500.0)
+    translatingBody4.setC(400.0)
+    translatingBody4.setK(100.0)
     translatingBodyEffector.addTranslatingBody(translatingBody4)
 
     profiler4 = prescribedLinearTranslation.PrescribedLinearTranslation()
