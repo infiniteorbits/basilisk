@@ -151,9 +151,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     constraintEffector.setR_P2P1_B1Init(r_P2P1_B1Init)
     constraintEffector.setAlpha(alpha)
     constraintEffector.setBeta(beta)
-    constraintEffector.setFilter_Data(wc) #0.09
-
-    print(r_P2P1_B1Init)
+    constraintEffector.setFilter_Data(wc)
 
     if deviceStatus == -1:
         effectorStatusMsgPayload = messaging.DeviceStatusMsgPayload()
