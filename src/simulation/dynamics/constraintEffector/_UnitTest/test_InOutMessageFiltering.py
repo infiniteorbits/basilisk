@@ -153,12 +153,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     constraintEffector.setBeta(beta)
     constraintEffector.setFilter_Data(wc)
 
-    if deviceStatus == -1:
-        effectorStatusMsgPayload = messaging.DeviceStatusMsgPayload()
-        #effectorStatusMsgPayload.deviceStatus = deviceStatus
-        effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
-        constraintEffector.effectorStatusInMsg.subscribeTo(effectorStatusMsg)
-    else:
+    if deviceStatus != -1:
         effectorStatusMsgPayload = messaging.DeviceStatusMsgPayload()
         effectorStatusMsgPayload.deviceStatus = deviceStatus
         effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
@@ -392,4 +387,4 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
 
     
 if __name__ == "__main__":
-    constraintEffectorInOutMessageFiltering(True,0.1,1)
+    constraintEffectorInOutMessageFiltering(True,0.1,0)
