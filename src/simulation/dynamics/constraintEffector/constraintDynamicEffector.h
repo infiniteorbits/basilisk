@@ -31,6 +31,8 @@
 #include "architecture/utilities/avsEigenMRP.h"
 #include <Eigen/Dense>
 #include <vector>
+#include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
+#include "architecture/messaging/messaging.h"
 // #include <iostream>
 // #include <cstring>
 
@@ -43,6 +45,7 @@ public:
     void linkInStates(DynParamManager& states);
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
+    void writeOutputStateMessage(uint64_t CurrentClock);
 
     /** setter for `r_P2P1_B1Init` initial spacecraft separation */
     void setR_P2P1_B1Init(Eigen::Vector3d r_P2P1_B1Init);
@@ -81,6 +84,10 @@ public:
     double getK_a() const {return this->k_a;};
     /** getter for `c_a` gain */
     double getC_a() const {return this->c_a;};
+
+public:
+
+    Message<ConstDynEffectorMsgPayload> constraintElements;
 
 private:
     // Counters and flags
