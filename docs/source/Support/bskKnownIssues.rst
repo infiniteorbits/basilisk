@@ -20,6 +20,8 @@ Version |release|
   Developers and users alike should continue to use `python conanfile.py` installation.
 - The CI test builds starting failing running the `gtest` unit test suite with the error
   ``CMake Error: Unknown argument: --gtest_output``.  The current release fixes this issue.
+- If the :ref:`simIncludeRW` python tool was provided a specific ``Js`` value, it was being falsely converted
+  before being assigned.  This is now corrected.
 
 
 Version 2.3.0
