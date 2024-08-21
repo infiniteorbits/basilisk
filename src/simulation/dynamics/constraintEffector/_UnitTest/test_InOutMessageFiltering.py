@@ -158,8 +158,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
         effectorStatusMsgPayload.deviceStatus = deviceStatus
         effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
         constraintEffector.effectorStatusInMsg.subscribeTo(effectorStatusMsg)
-
-    print(r_P2P1_B1Init)
+        
     constraintEffector.setFilter_Data(wc)
 
     if deviceStatus != -1:
