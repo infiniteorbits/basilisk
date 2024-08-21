@@ -25,8 +25,6 @@
 #include "simulation/dynamics/_GeneralModuleFiles/stateData.h"
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 
-#include "architecture/messaging/messaging.h"
-
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/utilities/avsEigenMRP.h"
 #include <Eigen/Dense>
@@ -155,6 +153,8 @@ private:
     // Force and torque quantities stored to be assigned on the alternating call of computeForceTorque
     Eigen::Vector3d Fc_N = Eigen::Vector3d::Zero(); //!< [N] force applied on each spacecraft COM in the inertial frame
     Eigen::Vector3d L_B2 = Eigen::Vector3d::Zero(); //!< [N-m] torque applied on spacecraft 2 in its body frame
+    Eigen::Vector3d T_B1 = Eigen::Vector3d::Zero(); //!< [N-m] torque applied on spacecraft 1 in its body frame
+    Eigen::Vector3d T_B2 = Eigen::Vector3d::Zero(); //!< [N-m] torque applied on spacecraft 2 in its body frame
 };
 
 
