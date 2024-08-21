@@ -84,6 +84,7 @@ Version |release|
 
 - The ``cmake`` command now downloads large Spice data files automatically from the JPL server.
 - Updated Conan/CMake build system to avoid unnecessary recompilations and greatly speed up rebuilds.
+- Added swirl torque information to ref:`THRConfigMsg`, ref:`thrustCMEstimation`, and :ref:`thrusterPlatformState`
 
 
 Version 2.3.0 (April 5, 2024)
