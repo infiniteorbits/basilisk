@@ -362,8 +362,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
         plt.show()
     plt.close("all")
 
-    print(final_psi_compare)
-
     accuracy = 1E-08
     np.testing.assert_allclose(final_psi_compare,0,atol = accuracy, err_msg = 'direction constraint output message norm is incorrect')
     np.testing.assert_allclose(final_FcN_compare,0,atol = accuracy, err_msg = 'constraint force output message norm is incorrect')
