@@ -19,6 +19,8 @@
 
 #include "constraintDynamicEffector.h"
 #include "architecture/utilities/avsEigenSupport.h"
+#include<cmath>
+#include<array>
 
 /*! This is the constructor, nothing to report here */
 ConstraintDynamicEffector::ConstraintDynamicEffector()
@@ -120,6 +122,27 @@ void ConstraintDynamicEffector::setC_a(double c_a) {
     }
 }
 
+/*Function to set the coefficients of a numerical low pass filtering mechanism*/
+
+void ConstraintDynamicEffector::setFilter_Data(double h, double wc){
+    double k = 0.9;
+    std::array<double,3> num_coeffs = {pow(wc*h,2),2*pow(wc*h,2),pow(wc*h,2)};
+    std::array<double,3> denom_coeffs = {4+4*k*wc*h+pow(wc*h,2),-8+2*pow(wc*h,2),4-4*a*wc*h+pow(wc*h,2)};
+    std::array<double,3> yl = {-denom_coeffs[1],-denom_coeffs[2],denom_coeffs[0]};
+    std::array<double,3> xl = {num_coeffs[1],num_coeffs[2],num_coeffs[0]};
+    this->a = yl[0]/yl[2];
+    this->b = yl[1]/yl[2];
+    this->c = xl[2]/yl[2];
+    this->d = xl[0]/yl[2];
+    this->e = xl[1]/yl[2];
+}
+
+// void ConstraintDynamicEffector::readSimulationStopTime(){
+//     if(this->SimulationStopTimeInMsg.isLinked()){
+//         this->SimulationStopTimeBuffer = this->SimulationStopTimeInMsg();
+//     }
+// }
+
 /*! This method allows the constraint effector to have access to the parent states
  @return void
  @param states The states to link
@@ -140,7 +163,7 @@ void ConstraintDynamicEffector::linkInStates(DynParamManager& states)
 
 /*! This method computes the forces on torques on each spacecraft body.
  @return void
- @param integTime
+ @param integTime 
  @param timeStep
  */
 void ConstraintDynamicEffector::computeForceTorque(double integTime, double timeStep)
@@ -224,16 +247,37 @@ void ConstraintDynamicEffector::writeOutputStateMessage(uint64_t CurrentClock)
     outputForces = this->constraintElements.zeroMsgPayload;
     eigenVector3d2CArray(this->forceExternal_N,outputForces.Fc_N);
     eigenVector3d2CArray(this->torqueExternalPntB_B,outputForces.L_B);
+    eigenVector3d2CArray(this->psi_N,outputForces.psi_N);
+    outputForces.F_filtered = this->F_filtered_mag_t;
     this->constraintElements.write(&outputForces,this->moduleID,CurrentClock);
 }
 
-/*! Update state method, nothing to report here
+/*! Update state method
  @return void
  @param CurrentSimNanos current simulation time
  */
 void ConstraintDynamicEffector::UpdateState(uint64_t CurrentSimNanos)
 {
+    //this->readSimulationStopTime();
+    //this->computeForceTorque(1.,1.);
+    this->computeFilteredState(CurrentSimNanos);
     this->writeOutputStateMessage(CurrentSimNanos);
-
+    
     return;
+}
+/*! Filtering method to calculate filtered Constraint Force
+ @return void
+ @param CurrentClock The current simulation time (used for time stamping)
+ */
+void ConstraintDynamicEffector::computeFilteredState(uint64_t CurrentClock)
+{
+
+    double F_t[3];
+    eigenVector3d2CArray(this->forceExternal_N,F_t);
+    this->F_mag_t = std::sqrt((F_t[0])*(F_t[0])+(F_t[1])*(F_t[1])+(F_t[2])*(F_t[2]));
+    this->F_filtered_mag_t = this->a*this->F_filtered_mag_tminus1 + this->b*this->F_filtered_mag_tminus2+this->c*this->F_mag_t+this->d*this->F_mag_tminus1+this->e*this->F_mag_tminus2;
+    this->F_filtered_mag_tminus2 = this->F_filtered_mag_tminus1;
+    this->F_filtered_mag_tminus1 = this->F_filtered_mag_t;
+    this->F_mag_tminus2 = this->F_mag_tminus1;
+    this->F_mag_tminus1 = this->F_mag_t;
 }

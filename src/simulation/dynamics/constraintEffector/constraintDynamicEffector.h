@@ -32,6 +32,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include "architecture/msgPayloadDefC/ConstDynEffectorMsgPayload.h"
+//#include "architecture/msgPayloadDefC/SimulationStopTimeMsgPayload.h"
 #include "architecture/messaging/messaging.h"
 // #include <iostream>
 // #include <cstring>
@@ -46,6 +47,8 @@ public:
     void computeForceTorque(double integTime, double timeStep);
     void UpdateState(uint64_t CurrentSimNanos);
     void writeOutputStateMessage(uint64_t CurrentClock);
+    //void readSimulationStopTime();
+    void computeFilteredState(uint64_t CurrentClock);
 
     /** setter for `r_P2P1_B1Init` initial spacecraft separation */
     void setR_P2P1_B1Init(Eigen::Vector3d r_P2P1_B1Init);
@@ -65,6 +68,8 @@ public:
     void setK_a(double k_a);
     /** setter for `c_a` gain */
     void setC_a(double c_a);
+    /** setter for `a,b,s,c,d,e` coefficients of low pass filter */
+    void setFilter_Data(double h, double wc);
 
     /** getter for `r_P2P1_B1Init` initial spacecraft separation */
     Eigen::Vector3d getR_P2P1_B1Init() const {return this->r_P2P1_B1Init;};
@@ -88,8 +93,11 @@ public:
 public:
 
     Message<ConstDynEffectorMsgPayload> constraintElements;
+    //ReadFunctor<SimulationStopTimeMsgPayload> SimulationStopTimeInMsg;
 
 private:
+
+    //SimulationStopTimeMsgPayload SimulationStopTimeBuffer;
     // Counters and flags
     int scInitCounter = 0; //!< counter to kill simulation if more than two spacecraft initialized
     int scID = 1; //!< 0,1 alternating spacecraft tracker to output appropriate force/torque
@@ -106,6 +114,18 @@ private:
     double c_d = 0.0; //!< direction constraint derivative gain
     double k_a = 0.0; //!< attitude constraint proportional gain
     double c_a = 0.0; //!< attitude constraint derivative gain
+    double a = 0.0; //!< coefficient in numerical low pass filter
+    double b = 0.0; //!< coefficient in numerical low pass filter
+    double c = 0.0; //!< coefficient in numerical low pass filter
+    double d = 0.0; //!< coefficient in numerical low pass filter
+    double e = 0.0; //!< coefficient in numerical low pass filter
+
+    double F_mag_tminus2 = 0.0; //!< Magnitude of unfiltered constraint force at t-2 time step
+    double F_mag_tminus1 = 0.0; //!< Magnitude of unfiltered constraint force at t-1 time step
+    double F_mag_t = 0.0; //!< Magnitude of unfiltered constraint force at t time step
+    double F_filtered_mag_t = 0.0; //!< Magnitude of filtered constraint force at t time step
+    double F_filtered_mag_tminus1 = 0.0; //!< Magnitude of filtered constraint force at t-1 time step
+    double F_filtered_mag_tminus2 = 0.0; //!< Magnitude of filtered constraint force at t-2 time step
 
     // Simulation variable pointers
     std::vector<StateData*> hubPosition;    //!< [m] parent inertial position vector
