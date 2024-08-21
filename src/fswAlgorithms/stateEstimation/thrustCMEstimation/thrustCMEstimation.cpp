@@ -82,6 +82,7 @@ void ThrustCMEstimation::UpdateState(uint64_t CurrentSimNanos)
     /*! compute thruster information in B-frame coordinates */
     Eigen::Vector3d r_TB_B = cArray2EigenVector3d(thrConfigBuffer.rThrust_B);
     Eigen::Vector3d T_B = thrConfigBuffer.maxThrust * cArray2EigenVector3d(thrConfigBuffer.tHatThrust_B);
+    Eigen::Vector3d LSwirl_B = thrConfigBuffer.swirlTorque * cArray2EigenVector3d(thrConfigBuffer.tHatThrust_B);
 
     /*! compute error w.r.t. target attitude */
     AttGuidMsgPayload attGuidBuffer = this->attGuidInMsg();
@@ -107,7 +108,7 @@ void ThrustCMEstimation::UpdateState(uint64_t CurrentSimNanos)
     if ((this->attGuidInMsg.isWritten()) && (attError < this->attitudeTol)) {
 
         /*! subtract torque about point B from measurement model */
-        y = L_B - r_TB_B.cross(T_B);
+        y = L_B - (r_TB_B.cross(T_B)) - LSwirl_B;
         /*! H is the skew-symmetric matrix obtained from T_B */
         H = eigenTilde(T_B);
         /*! S is defined for convenience */
