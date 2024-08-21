@@ -98,7 +98,6 @@ def test_constraintEffectorAllCases(show_plots,CutOffFreq,useConstEffector):
     constraintEffectorInOutMessageFiltering(show_plots,CutOffFreq,useConstEffector)
 
 def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
-def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
 
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
@@ -193,14 +192,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
         effectorStatusMsgPayload.deviceStatus = deviceStatus
         effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
         constraintEffector.effectorStatusInMsg.subscribeTo(effectorStatusMsg)
-        
-    constraintEffector.setFilter_Data(wc)
-
-    if deviceStatus != -1:
-        effectorStatusMsgPayload = messaging.DeviceStatusMsgPayload()
-        effectorStatusMsgPayload.deviceStatus = deviceStatus
-        effectorStatusMsg = messaging.DeviceStatusMsg().write(effectorStatusMsgPayload)
-        constraintEffector.effectorStatusInMsg.subscribeTo(effectorStatusMsg)
 
     # Add constraints to both spacecraft
     scObject1.addDynamicEffector(constraintEffector)
@@ -211,13 +202,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     unitTestSim.AddModelToTask(unitTaskName, scObject2)
     unitTestSim.AddModelToTask(unitTaskName, constraintEffector)
 
-
-    if deviceStatus==1:
-        print("Constraint effector is connected")
-    elif deviceStatus==0:
-        print("Constraint effector is not connected")
-    else:
-        print("Default behaviour expected")
 
     if deviceStatus==1:
         print("Constraint effector is connected")
@@ -271,24 +255,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     sigma_B2B1 = np.zeros(r_B1N_N_hist.shape)
 
     if deviceStatus!=0:
-    Fc_N_hist = dataLog3.Fc_N
-    L_B1_hist = dataLog3.L_B1
-    L_B2_hist = dataLog3.L_B2
-    psi_N_hist = dataLog3.psi_N
-    F_filtered_hist = dataLog3.F_filtered
-    T1_filtered_hist = dataLog3.T1_filtered
-    T2_filtered_hist = dataLog3.T2_filtered
-
-    final_FcN_compare = np.zeros(r_B1N_N_hist.shape)
-    final_filtered_FcN_compare = np.zeros(r_B1N_N_hist.shape)
-    final_filtered_LB1_compare = np.zeros(r_B1N_N_hist.shape)
-    final_filtered_LB2_compare = np.zeros(r_B1N_N_hist.shape)
-    final_L_B1_compare = np.zeros(r_B1N_N_hist.shape)
-    final_L_B2_compare = np.zeros(r_B1N_N_hist.shape)
-    final_psi_compare = np.zeros(r_B1N_N_hist.shape)
-    sigma_B2B1 = np.zeros(r_B1N_N_hist.shape)
-
-    if deviceStatus!=0:
 
     # Compute constraint violations
         check_psi_N = np.empty(r_B1N_N_hist.shape)
@@ -324,22 +290,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
             omega_B1N_N = dcm_NB1@omega_B1N_B1_hist[i,:]
             psiPrime_N[i,:] = rDot_P2P1_N - np.cross(omega_B1N_N,r_P2P1_N)
             check_FcN[i,:] = k_d*check_psi_N[i,:]+c_d*psiPrime_N[i,:]
-        for i in range(r_B1N_N_hist.shape[0]):
-            dcm_NB1 = np.transpose(RigidBodyKinematics.MRP2C(sigma_B1N_hist[i,:]))
-            dcm_B1N = RigidBodyKinematics.MRP2C(sigma_B1N_hist[i,:])
-            dcm_B2N = RigidBodyKinematics.MRP2C(sigma_B2N_hist[i,:])
-            dcm_NB2 = np.transpose(RigidBodyKinematics.MRP2C(sigma_B2N_hist[i,:]))
-            r_P2P1_N = dcm_NB2@r_P2B2_B2+r_B2N_N_hist[i,:]-dcm_NB1@r_P1B1_B1-r_B1N_N_hist[i,:]
-            sigma_B2B1[i,:] = RigidBodyKinematics.C2MRP(dcm_B2N@dcm_NB1)
-            rDot_P1B1_B1 = np.cross(omega_B1N_B1_hist[i,:],r_P1B1_B1)
-            rDot_P2B2_B2 = np.cross(omega_B2N_B2_hist[i,:],r_P2B2_B2)
-            rDot_P1N_N = dcm_NB1@rDot_P1B1_B1+rdot_B1N_N_hist[i,:]
-            rDot_P2N_N = dcm_NB2@rDot_P2B2_B2+rdot_B2N_N_hist[i,:]
-            rDot_P2P1_N = rDot_P2N_N-rDot_P1N_N
-            check_psi_N[i,:] = r_P2P1_N - dcm_NB1@r_P2P1_B1Init
-            omega_B1N_N = dcm_NB1@omega_B1N_B1_hist[i,:]
-            psiPrime_N[i,:] = rDot_P2P1_N - np.cross(omega_B1N_N,r_P2P1_N)
-            check_FcN[i,:] = k_d*check_psi_N[i,:]+c_d*psiPrime_N[i,:]
 
             omega_B1N_B2 = dcm_B2N@omega_B1N_N
             omega_B2B1_B2 = omega_B2N_B2_hist[i,:]-omega_B1N_B2
@@ -398,10 +348,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
         check_filtered_LB1[0:2] = T1_filtered_hist[0:2]
         check_filtered_LB2[0:2] = T2_filtered_hist[0:2]
 
-        for i in range(2,r_B1N_N_hist.shape[0]):
-            check_filtered_FcN[i] = a*check_filtered_FcN[i-1]+b*check_filtered_FcN[i-2]+c*np.linalg.norm(Fc_N_hist[i,:])+d*np.linalg.norm(Fc_N_hist[i-1,:])+e*np.linalg.norm(Fc_N_hist[i-2,:])
-            check_filtered_LB1[i] = a*check_filtered_LB1[i-1]+b*check_filtered_LB1[i-2]+c*np.linalg.norm(L_B1_hist[i,:])+d*np.linalg.norm(L_B1_hist[i-1,:])+e*np.linalg.norm(L_B1_hist[i-2,:])
-            check_filtered_LB2[i] = a*check_filtered_LB2[i-1]+b*check_filtered_LB2[i-2]+c*np.linalg.norm(L_B2_hist[i,:])+d*np.linalg.norm(L_B2_hist[i-1,:])+e*np.linalg.norm(L_B2_hist[i-2,:])
         for i in range(2,r_B1N_N_hist.shape[0]):
             check_filtered_FcN[i] = a*check_filtered_FcN[i-1]+b*check_filtered_FcN[i-2]+c*np.linalg.norm(Fc_N_hist[i,:])+d*np.linalg.norm(Fc_N_hist[i-1,:])+e*np.linalg.norm(Fc_N_hist[i-2,:])
             check_filtered_LB1[i] = a*check_filtered_LB1[i-1]+b*check_filtered_LB1[i-2]+c*np.linalg.norm(L_B1_hist[i,:])+d*np.linalg.norm(L_B1_hist[i-1,:])+e*np.linalg.norm(L_B1_hist[i-2,:])
@@ -417,11 +363,8 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     # Plotting
     plt.close("all")
     plt.figure()
-    plt.figure()
     plt.clf()
     for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(psi_N_hist[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(psi_N_hist,axis=1))
         plt.semilogy(constraintTimeData, np.abs(psi_N_hist[:, i]))
     plt.semilogy(constraintTimeData, np.linalg.norm(psi_N_hist,axis=1))
     plt.legend([r'$\psi_1$',r'$\psi_2$',r'$\psi_3$',r'$\psi$ magnitude'])
@@ -429,7 +372,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.ylabel(r'variation from fixed position: $\psi$ (meters)')
     plt.title('Direction Constraint Violation Components')
 
-    plt.figure()
     plt.figure()
     plt.clf()
     for i in range(3):
@@ -441,11 +383,8 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.title('Attitude Constraint Violation Components')
 
     plt.figure()
-    plt.figure()
     plt.clf()
     for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(Fc_N_hist[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N_hist,axis=1))
         plt.semilogy(constraintTimeData, np.abs(Fc_N_hist[:, i]))
     plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N_hist,axis=1))
     plt.legend([r'$FcN_1$',r'$FcN_2$',r'$FcN_3$',r'$FcN$ magnitude'])
@@ -454,10 +393,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.title('Constraint Force')
 
     plt.figure()
-    plt.figure()
     plt.clf()
-    plt.semilogy(constraintTimeData, F_filtered_hist)
-    plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N_hist,axis=1))
     plt.semilogy(constraintTimeData, F_filtered_hist)
     plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N_hist,axis=1))
     plt.legend([r'F_filtered magnitude',r'F_unfiltered magnitude'])
@@ -466,10 +402,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.title('Comparison between Filtered and Unifiltered Constraint Force')
 
     plt.figure()
-    plt.figure()
     plt.clf()
-    plt.semilogy(constraintTimeData, T2_filtered_hist)
-    plt.semilogy(constraintTimeData, np.linalg.norm(L_B2_hist,axis=1))
     plt.semilogy(constraintTimeData, T2_filtered_hist)
     plt.semilogy(constraintTimeData, np.linalg.norm(L_B2_hist,axis=1))
     plt.legend([r'T1_filtered magnitude',r'T1_unfiltered magnitude'])
@@ -478,10 +411,7 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.title('Comparison between Filtered and Unifiltered Constraint Torque on s/c 2')
 
     plt.figure()
-    plt.figure()
     plt.clf()
-    plt.semilogy(constraintTimeData, T1_filtered_hist)
-    plt.semilogy(constraintTimeData, np.linalg.norm(L_B1_hist,axis=1))
     plt.semilogy(constraintTimeData, T1_filtered_hist)
     plt.semilogy(constraintTimeData, np.linalg.norm(L_B1_hist,axis=1))
     plt.legend([r'T2_filtered magnitude',r'T2_unfiltered magnitude'])
@@ -490,11 +420,8 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     plt.title('Comparison between Filtered and Unifiltered Constraint Torque on s/c 1')
 
     plt.figure()
-    plt.figure()
     plt.clf()
     for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(psi_N_hist[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(psi_N_hist,axis=1))
         plt.semilogy(constraintTimeData, np.abs(psi_N_hist[:, i]))
     plt.semilogy(constraintTimeData, np.linalg.norm(psi_N_hist,axis=1))
     plt.legend([r'$\psi_1$',r'$\psi_2$',r'$\psi_3$',r'$\psi$ magnitude'])
@@ -505,11 +432,6 @@ def constraintEffectorInOutMessageFiltering(show_plots,wc,deviceStatus):
     if show_plots:
         plt.show()
     plt.close("all")
-
-    print(final_psi_compare)
-
-    accuracy = 1E-08
-    print(final_psi_compare)
 
     accuracy = 1E-08
     np.testing.assert_allclose(final_psi_compare,0,atol = accuracy, err_msg = 'direction constraint output message norm is incorrect')
