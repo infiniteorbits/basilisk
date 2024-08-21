@@ -353,9 +353,9 @@ def constraintEffectorRotationalConservation(show_plots):
     constraintEffector.setR_P1B1_B1(r_P1B1_B1)
     constraintEffector.setR_P2B2_B2(r_P2B2_B2)
     constraintEffector.setR_P2P1_B1Init(r_P2P1_B1Init)
-    constraintEffector.setAlpha(1E3)
-    constraintEffector.setBeta(1e3)
-    constraintEffector.setFilter_Data(1.,0.0) #0.09
+    constraintEffector.setAlpha(1E2)
+    constraintEffector.setBeta(1e2)
+
     # Add constraints to both spacecraft
     scObject1.addDynamicEffector(constraintEffector)
     scObject2.addDynamicEffector(constraintEffector)
@@ -395,12 +395,6 @@ def constraintEffectorRotationalConservation(show_plots):
     rdot_B2N_N_hist = datLog2.v_BN_N
     sigma_B2N_hist = datLog2.sigma_BN
     omega_B2N_B2_hist = datLog2.omega_BN_B
-
-    Fc_N = dataLog3.Fc_N
-    L_B = dataLog3.L_B
-    psi_N = dataLog3.psi_N
-    #F_filtered = dataLog3.F_filtered
-    
 
     # collect the logged conservation variables
     conservationTimeData = conservationData1.times() * macros.NANO2SEC
@@ -461,48 +455,6 @@ def constraintEffectorRotationalConservation(show_plots):
 
     plt.figure(3)
     plt.clf()
-    for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(Fc_N[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N,axis=1))
-    plt.legend([r'$FcN_1$',r'$FcN_2$',r'$FcN_3$',r'$FcN$ magnitude'])
-    plt.xlabel('time (seconds)')
-    plt.ylabel(r'Constraint force: $FcN$ (N)')
-    plt.title('Constraint Force')
-
-    # plt.figure(4)
-    # plt.clf()
-    # #for i in range(3):
-    # #    plt.semilogy(constraintTimeData, np.abs(F_filtered[:, i]))
-    # plt.semilogy(constraintTimeData, F_filtered)
-    # plt.semilogy(constraintTimeData, np.linalg.norm(Fc_N,axis=1))
-    # plt.legend([r'F_filtered magnitude',r'F_unfiltered magnitude'])
-    # plt.xlabel('time (seconds)')
-    # plt.ylabel(r'Force(N)')
-    # plt.title('Comparison between Filtered and Unifiltered Constraint Force')
-
-    plt.figure(5)
-    plt.clf()
-    for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(L_B[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(L_B,axis=1))
-    plt.legend([r'$L_1$',r'$L_2$',r'$L_3$',r'$L$ magnitude'])
-    plt.xlabel('time (seconds)')
-    plt.ylabel(r'Constraint torque: $L$ (N.m)')
-    plt.title('Constraint torque')
-
-    
-    plt.figure(6)
-    plt.clf()
-    for i in range(3):
-        plt.semilogy(constraintTimeData, np.abs(psi_N[:, i]))
-    plt.semilogy(constraintTimeData, np.linalg.norm(psi_N,axis=1))
-    plt.legend([r'$\psi_1$',r'$\psi_2$',r'$\psi_3$',r'$\psi$ magnitude'])
-    plt.xlabel('time (seconds)')
-    plt.ylabel(r'variation from fixed position: $\psi$ (meters)')
-    plt.title('Direction Constraint Violation Components in Inertial frame')
-
-    plt.figure(7)
-    plt.clf()
     plt.plot(conservationTimeData, (combinedRotAngMom[:,0] - combinedRotAngMom[0,0])/combinedRotAngMom[0,0],
              conservationTimeData, (combinedRotAngMom[:,1] - combinedRotAngMom[0,1])/combinedRotAngMom[0,1],
              conservationTimeData, (combinedRotAngMom[:,2] - combinedRotAngMom[0,2])/combinedRotAngMom[0,2])
@@ -510,7 +462,7 @@ def constraintEffectorRotationalConservation(show_plots):
     plt.ylabel('Relative Difference')
     plt.title('Combined Rotational Angular Momentum')
 
-    plt.figure(8)
+    plt.figure(4)
     plt.clf()
     plt.plot(conservationTimeData, (combinedRotEnergy - combinedRotEnergy[0])/combinedRotEnergy[0])
     plt.xlabel('time (seconds)')
