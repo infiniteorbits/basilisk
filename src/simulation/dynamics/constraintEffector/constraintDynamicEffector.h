@@ -68,7 +68,7 @@ public:
     /** setter for `c_a` gain */
     void setC_a(double c_a);
     /** setter for `a,b,s,c,d,e` coefficients of low pass filter */
-    void setFilter_Data(double h, double wc);
+    void setFilter_Data(double wc);
 
     /** getter for `r_P2P1_B1Init` initial spacecraft separation */
     Eigen::Vector3d getR_P2P1_B1Init() const {return this->r_P2P1_B1Init;};
@@ -91,17 +91,15 @@ public:
 
 public:
 
-    Message<ConstDynEffectorMsgPayload> constraintElements;
-    ReadFunctor<DeviceStatusMsgPayload> effectorStatusInMsg;
-    uint64_t effectorStatus=1;
+    Message<ConstDynEffectorMsgPayload> constraintElements; //!< output message with constraint force and torque on connected s/c
+    ReadFunctor<DeviceStatusMsgPayload> effectorStatusInMsg; //!< input message to record device status
+    uint64_t effectorStatus=1; //!< internal variable to toggle effector status
 
 private:
 
-    //ConstDynEffectorConnMsgPayload ConstDynEffectorConnBuffer;
     // Counters and flags
     int scInitCounter = 0; //!< counter to kill simulation if more than two spacecraft initialized
     int scID = 1; //!< 0,1 alternating spacecraft tracker to output appropriate force/torque
-    int check = 0;
 
     // Constraint length and direction
     Eigen::Vector3d r_P1B1_B1 = Eigen::Vector3d::Zero(); //!< [m] position vector from spacecraft 1 hub to its connection point P1
