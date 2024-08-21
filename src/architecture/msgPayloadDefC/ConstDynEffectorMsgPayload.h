@@ -21,14 +21,14 @@
 #define CONST_DYN_EFFECTOR_MSG_H
 
 /*! @brief Structure used to Constraint Dynamic Effector output message */
-typedef struct{
+typedef struct {
     double Fc_N[3]; //!< [N] Constraint force applied in Inertial frame
     double L_B1[3]; //!< [N.m] Constraint torque applied on s/c 1 in Inertial frame
     double L_B2[3]; //!< [N.m] Constraint torque applied on s/c 2 in Inertial frame
     double psi_N[3]; //!< [m] Length constraint violation
-    double F_filtered = 0.0; //!< [N] Filtered constraint force applied in Inertial frame
-    double T1_filtered = 0.0; //!< [N.m] Filtered constraint torque on s/c 1 applied in Inertial frame
-    double T2_filtered = 0.0; //!< [N.m] Filtered constraint torque on s/c 2 applied in Inertial frame
+    double F_filtered; //!< [N] Filtered constraint force applied in Inertial frame
+    double T1_filtered; //!< [N.m] Filtered constraint torque on s/c 1 applied in Inertial frame
+    double T2_filtered; //!< [N.m] Filtered constraint torque on s/c 2 applied in Inertial frame
 }ConstDynEffectorMsgPayload;
 
 #endif

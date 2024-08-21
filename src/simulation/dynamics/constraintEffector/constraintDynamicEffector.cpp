@@ -183,7 +183,7 @@ void ConstraintDynamicEffector::linkInStates(DynParamManager& states)
  */
 void ConstraintDynamicEffector::computeForceTorque(double integTime, double timeStep)
 {
-    if ((this->scInitCounter == 2)) { // only proceed once both spacecraft are added
+    if (this->scInitCounter == 2) { // only proceed once both spacecraft are added
         // alternate assigning the constraint force and torque
         if (this->scID == 0) { // compute all forces and torques once, assign to spacecraft 1 and store for spacecraft 2
             // - Collect states from both spacecraft
