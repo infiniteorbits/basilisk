@@ -16,7 +16,7 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module simpleNav
+%module relativeNav
 %{
    #include "relativeNav.h"
 %}
@@ -33,10 +33,6 @@ from Basilisk.architecture.swig_common_model import *
 
 %include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
 struct SCStatesMsg_C;
-%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-struct NavAttMsg_C;
-%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
-struct NavTransMsg_C;
 %include "architecture/msgPayloadDefC/RelNavAttMsgPayload.h"
 struct RelNavAttMsg_C;
 %include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"

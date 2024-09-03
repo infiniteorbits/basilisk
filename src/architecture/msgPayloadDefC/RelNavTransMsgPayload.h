@@ -25,7 +25,7 @@
 typedef struct {
     double timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
     double r_BcBs_Bs[3];     //!< [m]   Relative client spacecraft position with respect to servicer spacecraft, expressed in servicer body frame
-    double v_BcBc_Bs[3];     //!< [m/s] Relative client spacecraft speed with respect to servicer spacecraft, expressed in servicer body frame
+    double v_BcBs_Bs[3];     //!< [m/s] Relative client spacecraft speed with respect to servicer spacecraft, expressed in servicer body frame
 }RelNavTransMsgPayload;
 
 

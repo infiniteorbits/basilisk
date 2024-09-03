@@ -17,16 +17,13 @@
 
  */
 
-#ifndef SIMPLE_NAV_H
-#define SIMPLE_NAV_H
+#ifndef RELATIVE_NAV_H
+#define RELATIVE_NAV_H
 
 #include <vector>
 #include "architecture/_GeneralModuleFiles/sys_model.h"
 #include "architecture/utilities/gauss_markov.h"
 #include "architecture/msgPayloadDefC/SCStatesMsgPayload.h"
-#include "architecture/msgPayloadDefC/SpicePlanetStateMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
-#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 #include "architecture/msgPayloadDefC/RelNavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
 #include "architecture/utilities/bskLogging.h"

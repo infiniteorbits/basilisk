@@ -124,7 +124,7 @@ void RelativeNav::applyErrors()
     this->navErrors *= relative_distance_m;
 
     v3Add(this->trueRelTransState.r_BcBs_Bs, &(this->navErrors.data()[0]), this->estRelTransState.r_BcBs_Bs);
-    v3Add(this->trueRelTransState.v_BcBc_Bs, &(this->navErrors.data()[3]), this->estRelTransState.v_BcBc_Bs);
+    v3Add(this->trueRelTransState.v_BcBs_Bs, &(this->navErrors.data()[3]), this->estRelTransState.v_BcBs_Bs);
     
     addMRP(this->trueRelAttState.sigma_BcBs, &(this->navErrors.data()[6]), this->estRelAttState.sigma_BcBs);
     v3Add(this->trueRelAttState.omega_BcBs_Bs, &(this->navErrors.data()[9]), this->estRelAttState.omega_BcBs_Bs);
@@ -160,7 +160,7 @@ void RelativeNav::computeTrueOutput(uint64_t Clock)
     v3Subtract(this->clientInertialState.v_BN_N, this->servicerInertialState.v_BN_N, v_BcBs_N);
     m33tMultV3(servicer_dcm_BN, v_BcBs_N, v_BcBs_Bs);
     v3Cross(this->trueRelTransState.r_BcBs_Bs, this->servicerInertialState.omega_BN_B, v_BcBs_Bs_cross);
-    v2Add(v_BcBs_Bs, v_BcBs_Bs_cross, this->trueRelTransState.v_BcBc_Bs);
+    v2Add(v_BcBs_Bs, v_BcBs_Bs_cross, this->trueRelTransState.v_BcBs_Bs);
 
 
     m33tMultV3(dcm_BcBs, this->clientInertialState.omega_BN_B, client_omega_BN_Bs);
