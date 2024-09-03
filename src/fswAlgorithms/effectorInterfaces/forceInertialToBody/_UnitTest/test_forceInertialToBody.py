@@ -10,7 +10,7 @@
 #  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 #  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 #  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-#  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+#  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUunitSimpleNavENTIAL DAMAGES OR ANY DAMAGES
 #  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 #  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 #  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
@@ -30,7 +30,7 @@ from Basilisk.architecture import messaging
 from Basilisk.utilities import SimulationBaseClass
 from Basilisk.utilities import unitTestSupport
 from Basilisk.utilities import macros
-from Basilisk.fswAlgorithms import foceInertialToBody
+from Basilisk.fswAlgorithms import forceInertialToBody
 
 
 def test_unit_quaternion():
@@ -52,8 +52,8 @@ def Inertia2Body_test_function(force_inertial, sigma_BN, force_body_expected):
     testProc = unitTestSim.CreateNewProcess(unitProcessName)
     testProc.addTask(unitTestSim.CreateNewTask(unitTaskName, testProcessRate))
 
-    FoceInertialToBody = foceInertialToBody.FoceInertialToBody()
-    unitTestSim.AddModelToTask(unitTaskName, FoceInertialToBody)
+    ForceInertialToBody = forceInertialToBody.ForceInertialToBody()
+    unitTestSim.AddModelToTask(unitTaskName, ForceInertialToBody)
 
     cmdForceInertialInPayload = messaging.CmdForceInertialMsgPayload()
     cmdForceInertialInPayload.forceRequestInertial = force_inertial
@@ -63,14 +63,14 @@ def Inertia2Body_test_function(force_inertial, sigma_BN, force_body_expected):
     NavAttMsgInPayload.sigma_BN = sigma_BN
     NavAttMsg = messaging.NavAttMsg().write(NavAttMsgInPayload)
 
-    FoceInertialToBody.CmdForceInertialInMsg.subscribeTo(cmdForceInertialInMsg)
-    FoceInertialToBody.NavAttInMsg.subscribeTo(NavAttMsg)
+    ForceInertialToBody.dataForceInertialInMsg.subscribeTo(cmdForceInertialInMsg)
+    ForceInertialToBody.dataNavAttInMsg.subscribeTo(NavAttMsg)
 
     unitTestSim.InitializeSimulation()
     unitTestSim.ConfigureStopTime(macros.sec2nano(0.5))
     unitTestSim.ExecuteSimulation()
 
-    force_body = FoceInertialToBody.CmdForceBodyOutMsg.read().forceRequestBody
+    force_body = ForceInertialToBody.ForceBodyMsg.read().forceRequestBody
     print(force_body)
     rta = unitTestSupport.isVectorEqual(force_body, force_body_expected, 1e-3)
     assert rta == 1, f"Test failed, expected={force_body_expected}, result={force_body}"
