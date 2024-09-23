@@ -16,9 +16,9 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
-%module cppModuleTemplate
+%module relativeGuidanceTR
 %{
-   #include "cppModuleTemplate.h"
+   #include "relativeGuidanceTR.h"
 %}
 
 %pythoncode %{
@@ -28,10 +28,7 @@ from Basilisk.architecture.swig_common_model import *
 %include "swig_conly_data.i"
 
 %include "sys_model.i"
-%include "cppModuleTemplate.h"
-
-%include "architecture/msgPayloadDefC/CModuleTemplateMsgPayload.h"
-struct CModuleTemplateMsg_C;
+%include "relativeGuidanceTR.h"
 
 %pythoncode %{
 import sys
