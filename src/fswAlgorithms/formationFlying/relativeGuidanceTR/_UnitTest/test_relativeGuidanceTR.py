@@ -89,7 +89,7 @@ def relativeGuidanceTRTestFunction():
            """)
     t_total = relGuidanceTR_obj.dt_j*4+2*relGuidanceTR_obj.dt_a+relGuidanceTR_obj.dt_v
 
-    variableNames = ["d", "v", "a", "target_position_RTN", "target_velocity_RTN"]
+    variableNames = ["dva", "target_position_RTN", "target_velocity_RTN"]
     moduleLogArray = [relGuidanceTR_obj.logger(variableName) for variableName in variableNames]
     for moduleLog in moduleLogArray:
         unitTestSim.AddModelToTask(unitTaskName, moduleLog)
@@ -118,14 +118,13 @@ def relativeGuidanceTRTestFunction():
     plot = True
     if plot:
         fig, axes = plt.subplots(3,1)
-        for i, ax in enumerate(axes):
-            variableName  = variableNames[i]
-            times = output_dict[variableName][:,0]*macros.NANO2SEC
-            values = output_dict[variableName][:,1]
-            print(times.shape)
-            print(values.shape)
-            ax.plot(times, values, '*-')
-            ax.set_ylabel(variableNames[i])
+        times = output_dict["dva"][:,0]*macros.NANO2SEC
+        axes[0].plot(times, output_dict["dva"][:,1])
+        axes[0].set_ylabel("d")
+        axes[1].plot(times, output_dict["dva"][:,2])
+        axes[1].set_ylabel("v")
+        axes[2].plot(times, output_dict["dva"][:,3])
+        axes[2].set_ylabel("a")
         plt.show()
     return 1
 #

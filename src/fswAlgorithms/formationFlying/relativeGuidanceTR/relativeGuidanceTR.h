@@ -33,7 +33,7 @@ public:
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void BuildJerkMotion(double d);
-    void ComputeJerkMotion(double t, double dt);
+    void ComputeJerkMotion(double t, double* dva);
 
 public:
 
@@ -41,7 +41,7 @@ public:
     double waypoint0_RTN[3];
     double waypoint1_RTN[3];                            //!< [units] sample vector variable
     double direction[3];
-    double d,v,a;
+    double dva[3];
     double target_position_RTN[3];
     double target_velocity_RTN[3];
     double distance, dt_j, dt_a, dt_v, v_max, a_max;
@@ -51,7 +51,7 @@ private:
  
     uint64_t t0;
     uint64_t t_prev;
-    void sum_jerk(double* d, double* v, double* a, double jerk, double dt);
+    void sum_jerk(double* dva, double jerk, double dt);
 };
 
 
