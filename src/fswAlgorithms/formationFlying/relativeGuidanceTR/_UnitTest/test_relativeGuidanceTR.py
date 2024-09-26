@@ -54,7 +54,7 @@ from Basilisk.architecture import bskLogging
 def relativeGuidanceTRTestFunction():
     unitTaskName = "unitTask"               # arbitrary name (don't change)
     unitProcessName = "TestProcess"         # arbitrary name (don't change)
-    bskLogging.setDefaultLogLevel(bskLogging.BSK_INFORMATION)
+    bskLogging.setDefaultLogLevel(bskLogging.BSK_DEBUG)
 
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
@@ -101,7 +101,7 @@ def relativeGuidanceTRTestFunction():
     # NOTE: the total simulation time may be longer than this value. The
     # simulation is stopped at the next logging event on or after the
     # simulation end time.
-    unitTestSim.ConfigureStopTime(macros.sec2nano(t_total+200))        # seconds to stop simulation
+    unitTestSim.ConfigureStopTime(macros.sec2nano(10))        # seconds to stop simulation
 
     # Begin the simulation time run set above
     unitTestSim.ExecuteSimulation()

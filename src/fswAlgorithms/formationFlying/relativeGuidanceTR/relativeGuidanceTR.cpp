@@ -64,8 +64,8 @@ void RelativeGuidanceTR::BuildJerkMotion(double d){
 void RelativeGuidanceTR::sum_jerk(double* dva, double j, double dt){
     double d,v,a;
     d = dva[0];
-    a = dva[1];
-    v = dva[2];
+    v = dva[1];
+    a = dva[2];
     d = 1/6*j*dt*dt*dt + 1/2*a*dt*dt + v*dt + d;
     v = 1/2*j*dt*dt + a*dt + v;
     a = j*dt + a;
@@ -84,7 +84,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // positive jerk
     if (t <= (t0+this->dt_j)){
         dt = t-t0;
-        bskLogger.bskLog(BSK_DEBUG, "positive jerk 1 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "positive jerk 1 (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
         dt = this->dt_j;
@@ -96,7 +96,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // no jerk
     if (t <= (t0+this->dt_a)){
         dt = t - t0;
-        bskLogger.bskLog(BSK_DEBUG, "no jerk 1 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "no jerk 1 (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
          dt = this->dt_a;
@@ -109,7 +109,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // negative jerk
     if (t <= (t0+this->dt_j)){
         dt = t -t0;
-        bskLogger.bskLog(BSK_DEBUG, "negative jerk 1 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "negative jerk 1 (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
         dt = this->dt_j;
@@ -121,7 +121,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // constant speed
     if (t <= (t0+this->dt_v)){
         dt = t - t0;
-        bskLogger.bskLog(BSK_DEBUG, "constant speed (t0: %f, dt_v: %f)",t0, this->dt_v);
+        bskLogger.bskLog(BSK_DEBUG, "constant speed (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
         dt = this->dt_v;
@@ -133,7 +133,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // negative jerk
     if (t <= (t0+this->dt_j)){
         dt = t - t0;
-        bskLogger.bskLog(BSK_DEBUG, "negative jerk 2 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "negative jerk 2 (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
         dt = this->dt_j;
@@ -145,7 +145,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // constant acceleration
     if (t <= (t0+this->dt_a)){
         dt = t - t0;
-        bskLogger.bskLog(BSK_DEBUG, "no jerk 2 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "no jerk 2 (t0: %f, dt: %f)",t0, dt);;
         return_flag = true;
     } else {
         dt = this->dt_a;
@@ -157,7 +157,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     // positive jerk
     if (t <= (t0+this->dt_j)){
         dt = t - t0;
-        bskLogger.bskLog(BSK_DEBUG, "positive jerk 2 (t0: %f)",t0);
+        bskLogger.bskLog(BSK_DEBUG, "positive jerk 2 (t0: %f, dt: %f)",t0, dt);
         return_flag = true;
     } else {
         dt = this->dt_j;
@@ -165,7 +165,7 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     sum_jerk(dva, this->jerk, dt);
     if (return_flag) return;
 
-    bskLogger.bskLog(BSK_DEBUG, "no update (t0: %f)",t0);
+    bskLogger.bskLog(BSK_DEBUG, "no update");
     return;
 }
 
@@ -202,6 +202,7 @@ void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
     double target_delta_RTN[3];
     t = (CurrentSimNanos - this->t0) * NANO2SEC;
     ComputeJerkMotion(t, this->dva);
+    bskLogger.bskLog(BSK_DEBUG, "dva: [%f, %f, %f]", dva[0], dva[1], dva[2]);
     v3Scale(this->dva[0], this->direction, target_delta_RTN);
     v3Add(target_delta_RTN, this->waypoint0_RTN, this->target_position_RTN);
     v3Scale(this->dva[1], this->direction, this->target_velocity_RTN);
