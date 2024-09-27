@@ -54,7 +54,7 @@ from Basilisk.architecture import bskLogging
 def relativeGuidanceTRTestFunction():
     unitTaskName = "unitTask"               # arbitrary name (don't change)
     unitProcessName = "TestProcess"         # arbitrary name (don't change)
-    bskLogging.setDefaultLogLevel(bskLogging.BSK_DEBUG)
+    bskLogging.setDefaultLogLevel(bskLogging.BSK_INFORMATION)
 
     # Create a sim module as an empty container
     unitTestSim = SimulationBaseClass.SimBaseClass()
@@ -80,13 +80,6 @@ def relativeGuidanceTRTestFunction():
     relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,-12])
     relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN + np.array([0,0,distance])
     relGuidanceTR_obj.BuildJerkMotion(distance)
-    print(f"""
-              dt_j ={relGuidanceTR_obj.dt_j}s
-              dt_a ={relGuidanceTR_obj.dt_a}s
-              dt_v ={relGuidanceTR_obj.dt_v}s
-              v_max ={relGuidanceTR_obj.v_max} m/s
-              a_max ={relGuidanceTR_obj.a_max} m/s/s
-           """)
     t_total = relGuidanceTR_obj.dt_j*4+2*relGuidanceTR_obj.dt_a+relGuidanceTR_obj.dt_v
 
     variableNames = ["dva", "target_position_RTN", "target_velocity_RTN"]
@@ -101,7 +94,7 @@ def relativeGuidanceTRTestFunction():
     # NOTE: the total simulation time may be longer than this value. The
     # simulation is stopped at the next logging event on or after the
     # simulation end time.
-    unitTestSim.ConfigureStopTime(macros.sec2nano(10))        # seconds to stop simulation
+    unitTestSim.ConfigureStopTime(macros.sec2nano(t_total))        # seconds to stop simulation
 
     # Begin the simulation time run set above
     unitTestSim.ExecuteSimulation()

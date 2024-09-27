@@ -33,7 +33,7 @@ public:
     void Reset(uint64_t CurrentSimNanos);
     void UpdateState(uint64_t CurrentSimNanos);
     void BuildJerkMotion(double d);
-    void ComputeJerkMotion(double t, double* dva);
+    void ComputeJerkMotion(double t, double dva[3]);
 
 public:
 
@@ -51,7 +51,7 @@ private:
  
     uint64_t t0;
     uint64_t t_prev;
-    void sum_jerk(double* dva, double jerk, double dt);
+    void sum_jerk(double dva[3], double jerk, double dt);
 };
 
 

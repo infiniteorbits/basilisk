@@ -61,20 +61,13 @@ void RelativeGuidanceTR::BuildJerkMotion(double d){
     this->dt_v = dt_v;
 }
 
-void RelativeGuidanceTR::sum_jerk(double* dva, double j, double dt){
-    double d,v,a;
-    d = dva[0];
-    v = dva[1];
-    a = dva[2];
-    d = 1/6*j*dt*dt*dt + 1/2*a*dt*dt + v*dt + d;
-    v = 1/2*j*dt*dt + a*dt + v;
-    a = j*dt + a;
-    dva[0] = d;
-    dva[1] = v;
-    dva[2] = a;
+void RelativeGuidanceTR::sum_jerk(double dva[3], double j, double dt){
+    dva[0] += (1.0/6.0)*j*dt*dt*dt + (1.0/2.0)*dva[2]*dt*dt + dva[1]*dt;
+    dva[1] += (1.0/2.0)*j*dt*dt + dva[2]*dt;
+    dva[2] += j*dt;
 }
 
-void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
+void RelativeGuidanceTR::ComputeJerkMotion(double t, double dva[3]){
     double t0 = 0;
     double dt;
     bool return_flag = false;
@@ -89,9 +82,9 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
         dt = this->dt_j;
     }
-    t0 += dt;
     sum_jerk(dva, this->jerk, dt);
     if (return_flag) return;
+    t0 += dt;
 
     // no jerk
     if (t <= (t0+this->dt_a)){
@@ -101,10 +94,9 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
          dt = this->dt_a;
     }
-    t0 += dt;
     sum_jerk(dva, 0, dt);
     if (return_flag) return;
-
+    t0 += dt;
     
     // negative jerk
     if (t <= (t0+this->dt_j)){
@@ -114,9 +106,9 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
         dt = this->dt_j;
     }
-    t0 += dt;
     sum_jerk(dva, -this->jerk, dt);
     if (return_flag) return;
+    t0 += dt;
 
     // constant speed
     if (t <= (t0+this->dt_v)){
@@ -126,10 +118,10 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
         dt = this->dt_v;
     }
-    t0 += dt;
     sum_jerk(dva, 0, dt);
     if (return_flag) return;
-    
+    t0 += dt;
+
     // negative jerk
     if (t <= (t0+this->dt_j)){
         dt = t - t0;
@@ -138,10 +130,10 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
         dt = this->dt_j;
     }
-    t0 += dt;
     sum_jerk(dva, -this->jerk, dt);
     if (return_flag) return;
-    
+    t0 += dt;
+
     // constant acceleration
     if (t <= (t0+this->dt_a)){
         dt = t - t0;
@@ -150,9 +142,9 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double* dva){
     } else {
         dt = this->dt_a;
     }
-    t0 += dt;
     sum_jerk(dva, 0, dt);
     if (return_flag) return;
+    t0 += dt;
 
     // positive jerk
     if (t <= (t0+this->dt_j)){
@@ -198,17 +190,13 @@ void RelativeGuidanceTR::Reset(uint64_t CurrentSimNanos)
 void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
 {
     // Just advance the target relative position between the two waypoints.
-    double t, dt;
+    double t;
     double target_delta_RTN[3];
     t = (CurrentSimNanos - this->t0) * NANO2SEC;
     ComputeJerkMotion(t, this->dva);
-    bskLogger.bskLog(BSK_DEBUG, "dva: [%f, %f, %f]", dva[0], dva[1], dva[2]);
+    bskLogger.bskLog(BSK_DEBUG, "dva: [%.12f, %.12f, %.12f]", dva[0], dva[1], dva[2]);
     v3Scale(this->dva[0], this->direction, target_delta_RTN);
     v3Add(target_delta_RTN, this->waypoint0_RTN, this->target_position_RTN);
     v3Scale(this->dva[1], this->direction, this->target_velocity_RTN);
-    //bskLogger.bskLog(BSK_DEBUG, "target_position_RTN set to [%f, %f, %f].",
-    //this->target_position_RTN[0], this->target_position_RTN[1], this->target_position_RTN[2]);
-    //bskLogger.bskLog(BSK_DEBUG, "target_velocity_RTN set to [%f, %f, %f].",
-    //this->target_velocity_RTN[0], this->target_velocity_RTN[1], this->target_velocity_RTN[2]);
     this->t_prev = CurrentSimNanos;
 }
