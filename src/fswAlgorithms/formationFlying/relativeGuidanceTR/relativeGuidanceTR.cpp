@@ -22,7 +22,12 @@
 #include <math.h>
 #include "architecture/utilities/avsEigenSupport.h"
 #include "architecture/utilities/linearAlgebra.h"
+#include "architecture/utilities/rigidBodyKinematics.h"
 #include "architecture/utilities/macroDefinitions.h"
+
+#include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
 
 /*! This is the constructor for the module class.  It sets default variable
     values and initializes the various parts of the model */
@@ -161,6 +166,50 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double dva[3]){
     return;
 }
 
+/*! This method reads the input messages associated with the relative navigation
+    and the absolute attitude and navigation.
+    @return void
+ */
+void RelativeGuidanceTR::ReadInputMessages(){
+    this->RelTransState = this->relTransInMsg();
+    this->attState = this->attInMsg();
+    this->transInMsg = this->transInMsg();
+}
+
+/*! This method reads the input messages associated with the relative navigation
+    and the absolute attitude and navigation.
+    @return void
+ */
+void RelativeGuidanceTR::ComputePostionError(){
+    this->RelTransState = this->relTransInMsg();
+    this->attState = this->attInMsg();
+    this->transState = this->transInMsg();
+}
+
+void RelativeGuidanceTR::RotateRelTransToHillClient(){
+    double dcm_BsN[3][3];
+    double r_BcBs_N[3];
+    double r_BcN_N[3];
+    double v_BcBs_N[3];
+    double v_BcN_N[3];
+
+    // attState.sigma_BN to DCM_BsN
+    MRP2C(this->attState.sigma_BN, dcm_BsN);
+    // rotate r_BcBs_Bs to N and add transState.r_BN_N to obtain client's r_BN_N
+    m33MultV3(dcm_BsN, this->RelTransState.r_BcBs_Bs, r_BcBs_N);
+    v3Add(r_BcBs_N, this->transState.r_BN_N;, r_BcN_N);
+    // rotate v_BcBs_Bs to N, and add transState.v_BN_N to obtain client's v_BN_N
+    m33MultV3(dcm_BsN, this->RelTransState.v_BcBs_Bs, v_BcBs_N);
+    v3Add(v_BcBs_N, this->transState.v_BN_N;, v_BcN_N);
+    // build clients hill frame with hillFrame()
+    hillFrame(r_BcN_N, v_BcN_N, this->dcm_HcN);
+    // use DCM_BsN and hill to obtain RTN2Bs rotation
+    m33MultM33t(this->dcm_HcN, dcm_BsN, this->dcm_HcBs);
+    // rotate target_position_RTN and target_velocity_RTN to Bs
+    m33tMultV3(this->dcm_HcBs, this->RelTransState.r_BcBs_Bs, this->r_BcBs_Hc);
+    m33tMultV3(this->dcm_HcBs, this->RelTransState.v_BcBs_Bs, this->v_BcBs_Hc);
+}
+
 /*! This method is used to reset the module.
     @return void
  */
@@ -182,6 +231,13 @@ void RelativeGuidanceTR::Reset(uint64_t CurrentSimNanos)
     bskLogger.bskLog(BSK_INFORMATION, "Variable v_max set to %f in reset.",this->a_max);
     bskLogger.bskLog(BSK_INFORMATION, "Variable a_max set to %f in reset.",this->v_max);
 
+    if (!this->relTransInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR, "RelativeGuidanceTR.relTransInMsg was not linked.");
+    }
+}
+
+void RelativeGuidanceTR::ComputeForceOutput(){
+    
 }
 
 /*! This is the main method that gets called every time the module is updated.  Provide an appropriate description.
@@ -199,4 +255,8 @@ void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
     v3Add(target_delta_RTN, this->waypoint0_RTN, this->target_position_RTN);
     v3Scale(this->dva[1], this->direction, this->target_velocity_RTN);
     this->t_prev = CurrentSimNanos;
+
+    ReadInputMessages();
+    RotateRelTransToHillClient();
+    ComputeForceOutput();
 }

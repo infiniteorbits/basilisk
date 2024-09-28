@@ -24,6 +24,10 @@
 #include "architecture/utilities/bskLogging.h"
 #include "architecture/messaging/messaging.h"
 
+#include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+#include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+
 /*! @brief basic Basilisk C++ module class */
 class RelativeGuidanceTR:public SysModel {
 public:
@@ -46,6 +50,18 @@ public:
     double target_velocity_RTN[3];
     double distance, dt_j, dt_a, dt_v, v_max, a_max;
     BSKLogger bskLogger;              //!< -- BSK Logging
+
+    ReadFunctor<RelNavTransMsgPayload> relTransInMsg; // Input message from relative navigation.
+    ReadFunctor<NavAttMsgPayload> attInMsg;        //!< attitude navigation output msg
+    ReadFunctor<NavTransMsgPayload> transInMsg;    //!< translation navigation output msg
+
+    RelNavTransMsgPayload RelTransState;    //!< relative navigation traslation
+    NavAttMsgPayload AttState;
+    NavTransMsgPayload TransState;
+
+    double dcm_HcN[3][3]; // to state
+    double r_BsBst_Bs[3]; // to state
+    double v_BsBst_Bs[3]; // to state
 
 private:
  
