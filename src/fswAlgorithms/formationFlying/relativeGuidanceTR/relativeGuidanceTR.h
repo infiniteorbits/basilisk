@@ -27,6 +27,7 @@
 #include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
 #include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+#include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
 
 /*! @brief basic Basilisk C++ module class */
 class RelativeGuidanceTR:public SysModel {
@@ -38,12 +39,15 @@ public:
     void UpdateState(uint64_t CurrentSimNanos);
     void BuildJerkMotion(double d);
     void ComputeJerkMotion(double t, double dva[3]);
+    void ReadInputMessages();
+    void RotateRelTransToHillClient();
+    void ComputeForceOutput();
 
 public:
 
     double jerk, a_max_in, v_max_in;                       //!< [units] sample module variable declaration
     double waypoint0_RTN[3];
-    double waypoint1_RTN[3];                            //!< [units] sample vector variable
+    double waypoint1_RTN[3];                    //!< [units] sample vector variable
     double direction[3];
     double dva[3];
     double target_position_RTN[3];
@@ -60,8 +64,15 @@ public:
     NavTransMsgPayload TransState;
 
     double dcm_HcN[3][3]; // to state
-    double r_BsBst_Bs[3]; // to state
-    double v_BsBst_Bs[3]; // to state
+    double dcm_HcBs[3][3]; // to state
+    double r_BcBs_Hc[3]; // to state
+    double v_BcBs_Hc[3]; // to state
+
+    double lqr_gains[3][6];
+    double error_vector_RTN[6];
+    double force_out_Bs[3];
+
+    Message<CmdForceBodyMsgPayload> ForceBodyMsg;
 
 private:
  

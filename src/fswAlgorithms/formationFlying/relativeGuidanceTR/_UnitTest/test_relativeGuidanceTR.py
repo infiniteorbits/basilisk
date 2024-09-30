@@ -68,8 +68,6 @@ def relativeGuidanceTRTestFunction():
     # Construct algorithm and associated C++ container
     relGuidanceTR_obj = relativeGuidanceTR.RelativeGuidanceTR()
     relGuidanceTR_obj.ModelTag = "RelativeGuidanceTR"            # update python name of test module
-
-    # Add test module to runtime call list
     unitTestSim.AddModelToTask(unitTaskName, relGuidanceTR_obj)
 
     # Initialize the test module configuration data
@@ -79,8 +77,35 @@ def relativeGuidanceTRTestFunction():
     distance = 10
     relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,-12])
     relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN + np.array([0,0,distance])
+
+    relGuidanceTR_obj.LQR_gains = np.array([
+        [ 0.5000,   -0.0019,    0.0000,   25.8120,    0.0000,   -0.0000],
+        [ 0.0019,    0.5000,   -0.0000,    0.0000,   25.8117,   -0.0000],
+        [ 0.0000,    0.0000,    0.5000,    0.0000,    0.0000,   25.8117]])
+    
+    RelNavTransMsgPayload = messaging.RelNavTransMsgPayload()
+    RelNavTransMsgPayload.r_BcBs_Bs = relGuidanceTR_obj.waypoint0_RTN
+    RelNavTransMsgPayload.v_BcBs_Bs = np.array([0, 0, 0])
+    RelNavTransMsg = messaging.RelNavTransMsg().write(RelNavTransMsgPayload)
+
+    attInMsgPayload = messaging.NavAttMsgPayload()
+    attInMsgPayload.sigma_BN = np.array([0,0,0])
+    attInMsg = messaging.NavAttMsg().write(attInMsgPayload)
+
+    transInMsgPayload = messaging.NavTransMsgPayload()
+    transInMsgPayload.r_BN_N = np.array([40000000.0,0.0,0.0])
+    transInMsgPayload.v_BN_N = np.array([0.0,3000.0,0.0])
+    transInMsg = messaging.NavTransMsg().write(transInMsgPayload)
+
+    relGuidanceTR_obj.relTransInMsg.subscribeTo(RelNavTransMsg)
+    relGuidanceTR_obj.attInMsg.subscribeTo(attInMsg)
+    relGuidanceTR_obj.transInMsg.subscribeTo(transInMsg)
+    
     relGuidanceTR_obj.BuildJerkMotion(distance)
     t_total = relGuidanceTR_obj.dt_j*4+2*relGuidanceTR_obj.dt_a+relGuidanceTR_obj.dt_v
+
+    force_body_out_dataRec = relGuidanceTR_obj.ForceBodyMsg.recorder(testProcessRate)
+    unitTestSim.AddModelToTask(unitTaskName, force_body_out_dataRec)
 
     variableNames = ["dva", "target_position_RTN", "target_velocity_RTN"]
     moduleLogArray = [relGuidanceTR_obj.logger(variableName) for variableName in variableNames]
@@ -99,9 +124,6 @@ def relativeGuidanceTRTestFunction():
     # Begin the simulation time run set above
     unitTestSim.ExecuteSimulation()
 
-    # print all logging messages
-    relGuidanceTR_obj.bskLogger.printLogLevel()
-
     # This pulls the BSK module internal varialbe log from the simulation run.
     # Note, this should only be done for debugging as it is a slow process
     output_dict = {}
@@ -118,6 +140,15 @@ def relativeGuidanceTRTestFunction():
         axes[1].set_ylabel("v")
         axes[2].plot(times, output_dict["dva"][:,3])
         axes[2].set_ylabel("a")
+
+        fig, axes = plt.subplots(3,1)
+        times = force_body_out_dataRec.times() * macros.NANO2SEC
+        axes[0].plot(times, force_body_out_dataRec.forceRequestBody[:,0])
+        axes[0].set_ylabel("x")
+        axes[1].plot(times, force_body_out_dataRec.forceRequestBody[:,1])
+        axes[1].set_ylabel("y")
+        axes[2].plot(times, force_body_out_dataRec.forceRequestBody[:,2])
+        axes[2].set_ylabel("z")
         plt.show()
     return 1
 #

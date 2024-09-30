@@ -30,6 +30,12 @@ from Basilisk.architecture.swig_common_model import *
 %include "sys_model.i"
 %include "relativeGuidanceTR.h"
 
+%include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
+%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
+
+
 %pythoncode %{
 import sys
 protectAllClasses(sys.modules[__name__])

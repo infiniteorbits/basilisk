@@ -24,6 +24,7 @@
 #include "architecture/utilities/linearAlgebra.h"
 #include "architecture/utilities/rigidBodyKinematics.h"
 #include "architecture/utilities/macroDefinitions.h"
+#include "architecture/utilities/orbitalMotion.h"
 
 #include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
 #include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
@@ -172,18 +173,18 @@ void RelativeGuidanceTR::ComputeJerkMotion(double t, double dva[3]){
  */
 void RelativeGuidanceTR::ReadInputMessages(){
     this->RelTransState = this->relTransInMsg();
-    this->attState = this->attInMsg();
-    this->transInMsg = this->transInMsg();
-}
-
-/*! This method reads the input messages associated with the relative navigation
-    and the absolute attitude and navigation.
-    @return void
- */
-void RelativeGuidanceTR::ComputePostionError(){
-    this->RelTransState = this->relTransInMsg();
-    this->attState = this->attInMsg();
-    this->transState = this->transInMsg();
+    this->AttState = this->attInMsg();
+    this->TransState = this->transInMsg();
+    bskLogger.bskLog(BSK_DEBUG, "AttState.sigma_BN: [%.12f, %.12f, %.12f]", this->AttState.sigma_BN[0],
+        this->AttState.sigma_BN[1], this->AttState.sigma_BN[2]);
+    bskLogger.bskLog(BSK_DEBUG, "RelTransState.r_BcBs_Bs: [%.12f, %.12f, %.12f]", RelTransState.r_BcBs_Bs[0],
+        RelTransState.r_BcBs_Bs[1], RelTransState.r_BcBs_Bs[2]);
+    bskLogger.bskLog(BSK_DEBUG, "RelTransState.v_BcBs_Bs: [%.12f, %.12f, %.12f]", RelTransState.v_BcBs_Bs[0],
+        RelTransState.v_BcBs_Bs[1], RelTransState.v_BcBs_Bs[2]);
+    bskLogger.bskLog(BSK_DEBUG, "TransState.r_BN_N: [%.12f, %.12f, %.12f]", TransState.r_BN_N[0],
+        TransState.r_BN_N[1], TransState.r_BN_N[2]);
+    bskLogger.bskLog(BSK_DEBUG, "TransState.v_BN_N: [%.12f, %.12f, %.12f]", TransState.v_BN_N[0],
+        TransState.v_BN_N[1], TransState.v_BN_N[2]);
 }
 
 void RelativeGuidanceTR::RotateRelTransToHillClient(){
@@ -194,20 +195,41 @@ void RelativeGuidanceTR::RotateRelTransToHillClient(){
     double v_BcN_N[3];
 
     // attState.sigma_BN to DCM_BsN
-    MRP2C(this->attState.sigma_BN, dcm_BsN);
+    MRP2C(this->AttState.sigma_BN, dcm_BsN);
     // rotate r_BcBs_Bs to N and add transState.r_BN_N to obtain client's r_BN_N
     m33MultV3(dcm_BsN, this->RelTransState.r_BcBs_Bs, r_BcBs_N);
-    v3Add(r_BcBs_N, this->transState.r_BN_N;, r_BcN_N);
+    v3Add(r_BcBs_N, this->TransState.r_BN_N, r_BcN_N);
     // rotate v_BcBs_Bs to N, and add transState.v_BN_N to obtain client's v_BN_N
     m33MultV3(dcm_BsN, this->RelTransState.v_BcBs_Bs, v_BcBs_N);
-    v3Add(v_BcBs_N, this->transState.v_BN_N;, v_BcN_N);
+    v3Add(v_BcBs_N, this->TransState.v_BN_N, v_BcN_N);
     // build clients hill frame with hillFrame()
     hillFrame(r_BcN_N, v_BcN_N, this->dcm_HcN);
+    bskLogger.bskLog(BSK_DEBUG, "dcm_HcN: [%.12f, %.12f, %.12f]", dcm_HcN[0][0],
+        dcm_HcN[1][1], dcm_HcN[2][2]);
     // use DCM_BsN and hill to obtain RTN2Bs rotation
     m33MultM33t(this->dcm_HcN, dcm_BsN, this->dcm_HcBs);
     // rotate target_position_RTN and target_velocity_RTN to Bs
     m33tMultV3(this->dcm_HcBs, this->RelTransState.r_BcBs_Bs, this->r_BcBs_Hc);
     m33tMultV3(this->dcm_HcBs, this->RelTransState.v_BcBs_Bs, this->v_BcBs_Hc);
+}
+
+void RelativeGuidanceTR::ComputeForceOutput(){
+    double force_out_RTN[3];
+    int i,j;
+    for (i=0; i<3; i++){
+        this->error_vector_RTN[i] = this->target_position_RTN[i] - this->r_BcBs_Hc[i];
+        this->error_vector_RTN[i+3] = this->target_velocity_RTN[i] - this->v_BcBs_Hc[i];
+    }
+    bskLogger.bskLog(BSK_DEBUG, "error_vector_RTN: [%.12f, %.12f, %.12f,%.12f, %.12f, %.12f]", this->error_vector_RTN[0],
+        this->error_vector_RTN[1], this->error_vector_RTN[2], this->error_vector_RTN[3],
+        this->error_vector_RTN[4], this->error_vector_RTN[5]);
+    for (i=0; i<3; i++){
+        force_out_RTN[i] = this->target_position_RTN[i];
+        for (j=0; j<6; j++){
+            force_out_RTN[i] += this->lqr_gains[i][j]*this->error_vector_RTN[j];
+        }
+    }
+    m33MultV3(this->dcm_HcBs, force_out_RTN, this->force_out_Bs);
 }
 
 /*! This method is used to reset the module.
@@ -234,10 +256,12 @@ void RelativeGuidanceTR::Reset(uint64_t CurrentSimNanos)
     if (!this->relTransInMsg.isLinked()) {
         bskLogger.bskLog(BSK_ERROR, "RelativeGuidanceTR.relTransInMsg was not linked.");
     }
-}
-
-void RelativeGuidanceTR::ComputeForceOutput(){
-    
+    if (!this->attInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR, "RelativeGuidanceTR.attInMsg was not linked.");
+    }
+    if (!this->transInMsg.isLinked()) {
+        bskLogger.bskLog(BSK_ERROR, "RelativeGuidanceTR.transInMsg was not linked.");
+    }
 }
 
 /*! This is the main method that gets called every time the module is updated.  Provide an appropriate description.
@@ -245,6 +269,8 @@ void RelativeGuidanceTR::ComputeForceOutput(){
  */
 void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
 {
+    CmdForceBodyMsgPayload cmdForceBodyMsgBuffer;
+    cmdForceBodyMsgBuffer = this->ForceBodyMsg.zeroMsgPayload;
     // Just advance the target relative position between the two waypoints.
     double t;
     double target_delta_RTN[3];
@@ -258,5 +284,14 @@ void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
 
     ReadInputMessages();
     RotateRelTransToHillClient();
+    bskLogger.bskLog(BSK_DEBUG, "r_BcBs_Hc: [%.12f, %.12f, %.12f]", r_BcBs_Hc[0],
+        r_BcBs_Hc[1], r_BcBs_Hc[2]);
+    bskLogger.bskLog(BSK_DEBUG, "v_BcBs_Hc: [%.12f, %.12f, %.12f]", v_BcBs_Hc[0],
+        v_BcBs_Hc[1], v_BcBs_Hc[2]);
     ComputeForceOutput();
+    bskLogger.bskLog(BSK_DEBUG, "force_out_Bs: [%.12f, %.12f, %.12f]", this->force_out_Bs[0],
+        this->force_out_Bs[1], this->force_out_Bs[2]);
+    v3Copy(this->force_out_Bs, cmdForceBodyMsgBuffer.forceRequestBody);
+    this->ForceBodyMsg.write(&cmdForceBodyMsgBuffer, this->moduleID, CurrentSimNanos);
+
 }
