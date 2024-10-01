@@ -214,7 +214,7 @@ void RelativeGuidanceTR::RotateRelTransToHillClient(){
 }
 
 void RelativeGuidanceTR::ComputeForceOutput(){
-    double force_out_RTN[3];
+    double force_out_RTN[3] = {0, 0, 0};
     int i,j;
     for (i=0; i<3; i++){
         this->error_vector_RTN[i] = this->target_position_RTN[i] - this->r_BcBs_Hc[i];
@@ -224,11 +224,12 @@ void RelativeGuidanceTR::ComputeForceOutput(){
         this->error_vector_RTN[1], this->error_vector_RTN[2], this->error_vector_RTN[3],
         this->error_vector_RTN[4], this->error_vector_RTN[5]);
     for (i=0; i<3; i++){
-        force_out_RTN[i] = this->target_position_RTN[i];
         for (j=0; j<6; j++){
-            force_out_RTN[i] += this->lqr_gains[i][j]*this->error_vector_RTN[j];
+            force_out_RTN[i] -= this->lqr_gains[i][j]*this->error_vector_RTN[j];
         }
     }
+    bskLogger.bskLog(BSK_DEBUG, "force_out_RTN: [%.12f, %.12f, %.12f]", force_out_RTN[0],
+        force_out_RTN[1], force_out_RTN[2]);
     m33MultV3(this->dcm_HcBs, force_out_RTN, this->force_out_Bs);
 }
 

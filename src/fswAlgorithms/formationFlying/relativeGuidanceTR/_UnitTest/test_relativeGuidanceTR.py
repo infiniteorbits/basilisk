@@ -78,7 +78,7 @@ def relativeGuidanceTRTestFunction():
     relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,-12])
     relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN + np.array([0,0,distance])
 
-    relGuidanceTR_obj.LQR_gains = np.array([
+    relGuidanceTR_obj.lqr_gains = np.array([
         [ 0.5000,   -0.0019,    0.0000,   25.8120,    0.0000,   -0.0000],
         [ 0.0019,    0.5000,   -0.0000,    0.0000,   25.8117,   -0.0000],
         [ 0.0000,    0.0000,    0.5000,    0.0000,    0.0000,   25.8117]])
