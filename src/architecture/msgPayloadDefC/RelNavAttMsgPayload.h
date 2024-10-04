@@ -23,8 +23,8 @@
 /*! @brief Structure used to define the output definition for attitude guidance*/
 typedef struct {
     double timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
-    double sigma_BcBs[3];      //!<       Current client spacecraft attitude (MRPs) with respecto to servicer spacecraft */
-    double omega_BcBs_Bs[3];    //!< [r/s] Current client spacecraft angular velocity vector with respect to servicer frame in servicer B frame components
+    double sigma_BsBc[3];      //!<       Current client spacecraft attitude (MRPs) with respecto to servicer spacecraft */
+    double omega_BsBc_Bs[3];    //!< [r/s] Current client spacecraft angular velocity vector with respect to servicer frame in servicer B frame components
 }RelNavAttMsgPayload;
 
 

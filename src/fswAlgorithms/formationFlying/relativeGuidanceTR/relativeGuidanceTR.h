@@ -65,8 +65,8 @@ public:
 
     double dcm_HcN[3][3]; // to state
     double dcm_HcBs[3][3]; // to state
-    double r_BcBs_Hc[3]; // to state
-    double v_BcBs_Hc[3]; // to state
+    double r_BsBc_Hc[3]; // to state
+    double v_BsBc_Hc[3]; // to state
 
     double lqr_gains[3][6];
     double error_vector_RTN[6];

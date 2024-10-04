@@ -24,8 +24,8 @@
 /*! @brief Structure used to define the output definition for translatoin guidance*/
 typedef struct {
     double timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
-    double r_BcBs_Bs[3];     //!< [m]   Relative client spacecraft position with respect to servicer spacecraft, expressed in servicer body frame
-    double v_BcBs_Bs[3];     //!< [m/s] Relative client spacecraft speed with respect to servicer spacecraft, expressed in servicer body frame
+    double r_BsBc_Bs[3];     //!< [m]   Relative client spacecraft position with respect to servicer spacecraft, expressed in servicer body frame
+    double v_BsBc_Bs[3];     //!< [m/s] Relative client spacecraft speed with respect to servicer spacecraft, expressed in servicer body frame
 }RelNavTransMsgPayload;
 
 

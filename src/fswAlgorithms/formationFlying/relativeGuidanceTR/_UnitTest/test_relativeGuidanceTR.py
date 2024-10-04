@@ -75,8 +75,8 @@ def relativeGuidanceTRTestFunction():
     relGuidanceTR_obj.a_max_in = 1/666
     relGuidanceTR_obj.jerk = relGuidanceTR_obj.a_max_in / 1000
     distance = 10
-    relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,-12])
-    relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN + np.array([0,0,distance])
+    relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,12])
+    relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN - np.array([0,0,distance])
 
     relGuidanceTR_obj.lqr_gains = np.array([
         [ 0.5000,   -0.0019,    0.0000,   25.8120,    0.0000,   -0.0000],
@@ -84,8 +84,8 @@ def relativeGuidanceTRTestFunction():
         [ 0.0000,    0.0000,    0.5000,    0.0000,    0.0000,   25.8117]])
     
     RelNavTransMsgPayload = messaging.RelNavTransMsgPayload()
-    RelNavTransMsgPayload.r_BcBs_Bs = relGuidanceTR_obj.waypoint0_RTN
-    RelNavTransMsgPayload.v_BcBs_Bs = np.array([0, 0, 0])
+    RelNavTransMsgPayload.r_BsBc_Bs = relGuidanceTR_obj.waypoint0_RTN
+    RelNavTransMsgPayload.v_BsBc_Bs = np.array([0, 0, 0])
     RelNavTransMsg = messaging.RelNavTransMsg().write(RelNavTransMsgPayload)
 
     attInMsgPayload = messaging.NavAttMsgPayload()
