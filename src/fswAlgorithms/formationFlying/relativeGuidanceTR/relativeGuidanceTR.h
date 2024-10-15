@@ -46,12 +46,12 @@ public:
 public:
 
     double jerk, a_max_in, v_max_in;                       //!< [units] sample module variable declaration
-    double waypoint0_RTN[3];
-    double waypoint1_RTN[3];                    //!< [units] sample vector variable
+    double waypoint_0_r_BcBs_Hc[3];
+    double waypoint_1_r_BcBs_Hc[3];                    //!< [units] sample vector variable
     double direction[3];
     double dva[3];
-    double target_position_RTN[3];
-    double target_velocity_RTN[3];
+    double target_r_BcBs_Hc[3];
+    double target_v_BcBs_Hc[3];
     double distance, dt_j, dt_a, dt_v, v_max, a_max;
     BSKLogger bskLogger;              //!< -- BSK Logging
 
@@ -69,7 +69,7 @@ public:
     double v_BsBc_Hc[3]; // to state
 
     double lqr_gains[3][6];
-    double error_vector_RTN[6];
+    double error_BsBc_Hc[6];
     double force_out_Bs[3];
 
     Message<CmdForceBodyMsgPayload> ForceBodyMsg;

@@ -230,23 +230,23 @@ void RelativeGuidanceTR::RotateRelTransToHillClient(){
 }
 
 void RelativeGuidanceTR::ComputeForceOutput(){
-    double force_out_RTN[3] = {0, 0, 0};
+    double force_out_Hc[3] = {0, 0, 0};
     int i,j;
     for (i=0; i<3; i++){
-        this->error_vector_RTN[i] = this->target_position_RTN[i] - this->r_BsBc_Hc[i];
-        this->error_vector_RTN[i+3] = this->target_velocity_RTN[i] - this->v_BsBc_Hc[i];
+        this->error_BsBc_Hc[i] = -this->target_r_BcBs_Hc[i] - this->r_BsBc_Hc[i];
+        this->error_BsBc_Hc[i+3] = -this->target_v_BcBs_Hc[i] - this->v_BsBc_Hc[i];
     }
-    bskLogger.bskLog(BSK_DEBUG, "error_vector_RTN: [%.12f, %.12f, %.12f,%.12f, %.12f, %.12f]", this->error_vector_RTN[0],
-        this->error_vector_RTN[1], this->error_vector_RTN[2], this->error_vector_RTN[3],
-        this->error_vector_RTN[4], this->error_vector_RTN[5]);
+    bskLogger.bskLog(BSK_DEBUG, "error_BsBc_Hc: [%.12f, %.12f, %.12f,%.12f, %.12f, %.12f]", this->error_BsBc_Hc[0],
+        this->error_BsBc_Hc[1], this->error_BsBc_Hc[2], this->error_BsBc_Hc[3],
+        this->error_BsBc_Hc[4], this->error_BsBc_Hc[5]);
     for (i=0; i<3; i++){
         for (j=0; j<6; j++){
-            force_out_RTN[i] -= this->lqr_gains[i][j]*this->error_vector_RTN[j];
+            force_out_Hc[i] -= this->lqr_gains[i][j]*this->error_BsBc_Hc[j];
         }
     }
-    bskLogger.bskLog(BSK_DEBUG, "force_out_RTN: [%.12f, %.12f, %.12f]", force_out_RTN[0],
-        force_out_RTN[1], force_out_RTN[2]);
-    m33MultV3(this->dcm_HcBs, force_out_RTN, this->force_out_Bs);
+    bskLogger.bskLog(BSK_DEBUG, "force_out_Hc: [%.12f, %.12f, %.12f]", force_out_Hc[0],
+        force_out_Hc[1], force_out_Hc[2]);
+    m33MultV3(this->dcm_HcBs, force_out_Hc, this->force_out_Bs);
 }
 
 /*! This method is used to reset the module.
@@ -256,7 +256,7 @@ void RelativeGuidanceTR::Reset(uint64_t CurrentSimNanos)
 {
     /*! - reset any required variables */
     double distance_vec[3];
-    v3Subtract(this->waypoint1_RTN, this->waypoint0_RTN, distance_vec);
+    v3Subtract(this->waypoint_1_r_BcBs_Hc, this->waypoint_0_r_BcBs_Hc, distance_vec);
     this->distance = v3Norm(distance_vec);
     v3Normalize(distance_vec, this->direction);
     
@@ -290,13 +290,13 @@ void RelativeGuidanceTR::UpdateState(uint64_t CurrentSimNanos)
     cmdForceBodyMsgBuffer = this->ForceBodyMsg.zeroMsgPayload;
     // Just advance the target relative position between the two waypoints.
     double t;
-    double target_delta_RTN[3];
+    double target_delta_r_BcBs_Hc[3];
     t = (CurrentSimNanos - this->t0) * NANO2SEC;
     ComputeJerkMotion(t, this->dva);
     bskLogger.bskLog(BSK_DEBUG, "dva: [%.12f, %.12f, %.12f]", dva[0], dva[1], dva[2]);
-    v3Scale(this->dva[0], this->direction, target_delta_RTN);
-    v3Add(target_delta_RTN, this->waypoint0_RTN, this->target_position_RTN);
-    v3Scale(this->dva[1], this->direction, this->target_velocity_RTN);
+    v3Scale(this->dva[0], this->direction, target_delta_r_BcBs_Hc);
+    v3Add(target_delta_r_BcBs_Hc, this->waypoint_0_r_BcBs_Hc, this->target_r_BcBs_Hc);
+    v3Scale(this->dva[1], this->direction, this->target_v_BcBs_Hc);
     this->t_prev = CurrentSimNanos;
 
     ReadInputMessages();

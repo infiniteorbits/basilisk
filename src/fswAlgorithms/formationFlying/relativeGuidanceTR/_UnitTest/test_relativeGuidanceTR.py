@@ -75,8 +75,8 @@ def relativeGuidanceTRTestFunction():
     relGuidanceTR_obj.a_max_in = 1/666
     relGuidanceTR_obj.jerk = relGuidanceTR_obj.a_max_in / 1000
     distance = 10
-    relGuidanceTR_obj.waypoint0_RTN = np.array([0,0,12])
-    relGuidanceTR_obj.waypoint1_RTN = relGuidanceTR_obj.waypoint0_RTN - np.array([0,0,distance])
+    relGuidanceTR_obj.waypoint_0_r_BcBs_Hc = np.array([0,0,12])
+    relGuidanceTR_obj.waypoint_1_r_BcBs_Hc = relGuidanceTR_obj.waypoint_0_r_BcBs_Hc - np.array([0,0,distance])
 
     relGuidanceTR_obj.lqr_gains = np.array([
         [ 0.5000,   -0.0019,    0.0000,   25.8120,    0.0000,   -0.0000],
@@ -84,7 +84,7 @@ def relativeGuidanceTRTestFunction():
         [ 0.0000,    0.0000,    0.5000,    0.0000,    0.0000,   25.8117]])
     
     RelNavTransMsgPayload = messaging.RelNavTransMsgPayload()
-    RelNavTransMsgPayload.r_BsBc_Bs = relGuidanceTR_obj.waypoint0_RTN
+    RelNavTransMsgPayload.r_BsBc_Bs = relGuidanceTR_obj.waypoint_0_r_BcBs_Hc
     RelNavTransMsgPayload.v_BsBc_Bs = np.array([0, 0, 0])
     RelNavTransMsg = messaging.RelNavTransMsg().write(RelNavTransMsgPayload)
 
@@ -107,7 +107,7 @@ def relativeGuidanceTRTestFunction():
     force_body_out_dataRec = relGuidanceTR_obj.ForceBodyMsg.recorder(testProcessRate)
     unitTestSim.AddModelToTask(unitTaskName, force_body_out_dataRec)
 
-    variableNames = ["dva", "target_position_RTN", "target_velocity_RTN"]
+    variableNames = ["dva", "target_r_BcBs_Hc", "target_v_BcBs_Hc"]
     moduleLogArray = [relGuidanceTR_obj.logger(variableName) for variableName in variableNames]
     for moduleLog in moduleLogArray:
         unitTestSim.AddModelToTask(unitTaskName, moduleLog)
