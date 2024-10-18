@@ -189,6 +189,7 @@ void RelativeGuidanceTR::ReadInputMessages(){
 
 void RelativeGuidanceTR::RotateRelTransToHillClient(){
     double dcm_BsN[3][3];
+    double dcm_BsHc[3][3];
     double r_BsBc_N[3];
     double r_BcN_N[3];
     double v_BsBc_N[3];
@@ -215,7 +216,8 @@ void RelativeGuidanceTR::RotateRelTransToHillClient(){
     for (int i=0; i<3; i++) this->v_BsBc_Hc[i] = -v_BcBs_Hc[i];
 
     hillFrame(r_BcN_N, v_BcN_N, this->dcm_HcN);
-    m33MultM33t(this->dcm_HcN, dcm_BsN, this->dcm_HcBs);
+    m33MultM33t(this->dcm_HcN, dcm_BsN, dcm_BsHc);
+    m33Transpose(dcm_BsHc, this->dcm_HcBs);
     /*
     // build clients hill frame with hillFrame()
     hillFrame(r_BcN_N, v_BcN_N, this->dcm_HcN);
