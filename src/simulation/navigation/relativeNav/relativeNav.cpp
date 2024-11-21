@@ -120,14 +120,14 @@ void RelativeNav::applyErrors()
 {
     double relative_distance_m;
     //! - Error are to be scaled by the relative distance between the two spacecrafts
-    relative_distance_m = v3Norm(this->trueRelTransState.r_BcBs_Bs);
+    relative_distance_m = v3Norm(this->trueRelTransState.r_BsBc_Bs);
     this->navErrors *= relative_distance_m;
 
-    v3Add(this->trueRelTransState.r_BcBs_Bs, &(this->navErrors.data()[0]), this->estRelTransState.r_BcBs_Bs);
-    v3Add(this->trueRelTransState.v_BcBs_Bs, &(this->navErrors.data()[3]), this->estRelTransState.v_BcBs_Bs);
+    v3Add(this->trueRelTransState.r_BsBc_Bs, &(this->navErrors.data()[0]), this->estRelTransState.r_BsBc_Bs);
+    v3Add(this->trueRelTransState.v_BsBc_Bs, &(this->navErrors.data()[3]), this->estRelTransState.v_BsBc_Bs);
     
-    addMRP(this->trueRelAttState.sigma_BcBs, &(this->navErrors.data()[6]), this->estRelAttState.sigma_BcBs);
-    v3Add(this->trueRelAttState.omega_BcBs_Bs, &(this->navErrors.data()[9]), this->estRelAttState.omega_BcBs_Bs);
+    addMRP(this->trueRelAttState.sigma_BsBc, &(this->navErrors.data()[6]), this->estRelAttState.sigma_BsBc);
+    v3Add(this->trueRelAttState.omega_BsBc_Bs, &(this->navErrors.data()[9]), this->estRelAttState.omega_BsBc_Bs);
 }
 
 
@@ -138,34 +138,32 @@ void RelativeNav::applyErrors()
 */
 void RelativeNav::computeTrueOutput(uint64_t Clock)
 {   
-    double r_BcBs_N[3];
-    double v_BcBs_N[3];
-    double v_BcBs_Bs[3];
-    double v_BcBs_Bs_cross[3];
+    double r_BsBc_N[3];
+    double v_BsBc_N[3];
+    double v_BsBc_Bs[3];
+    double v_BsBc_Bs_cross[3];
     double client_dcm_BN[3][3];
     double servicer_dcm_BN[3][3];
-    double dcm_BcBs[3][3];
+    double dcm_BsBc[3][3];
     double client_omega_BN_Bs[3];
 
     // Compute relative attitude
     MRP2C(this->clientInertialState.sigma_BN, client_dcm_BN);
     MRP2C(this->servicerInertialState.sigma_BN, servicer_dcm_BN);
-    m33MultM33t(client_dcm_BN, servicer_dcm_BN, dcm_BcBs);
-    C2MRP(dcm_BcBs, this->trueRelAttState.sigma_BcBs);
+    m33MultM33t(servicer_dcm_BN, client_dcm_BN, dcm_BsBc);
+    C2MRP(dcm_BsBc, this->trueRelAttState.sigma_BsBc);
 
     // Compute relative position and velocity
-    v3Subtract(this->clientInertialState.r_BN_N, this->servicerInertialState.r_BN_N, r_BcBs_N);
-    m33tMultV3(servicer_dcm_BN, r_BcBs_N, this->trueRelTransState.r_BcBs_Bs);
+    v3Subtract(this->clientInertialState.r_BN_N, this->servicerInertialState.r_BN_N, r_BsBc_N);
+    m33tMultV3(servicer_dcm_BN, r_BsBc_N, this->trueRelTransState.r_BsBc_Bs);
     
-    v3Subtract(this->clientInertialState.v_BN_N, this->servicerInertialState.v_BN_N, v_BcBs_N);
-    m33tMultV3(servicer_dcm_BN, v_BcBs_N, v_BcBs_Bs);
-    v3Cross(this->trueRelTransState.r_BcBs_Bs, this->servicerInertialState.omega_BN_B, v_BcBs_Bs_cross);
-    v2Add(v_BcBs_Bs, v_BcBs_Bs_cross, this->trueRelTransState.v_BcBs_Bs);
+    v3Subtract(this->clientInertialState.v_BN_N, this->servicerInertialState.v_BN_N, v_BsBc_N);
+    m33tMultV3(servicer_dcm_BN, v_BsBc_N, v_BsBc_Bs);
+    v3Cross(this->trueRelTransState.r_BsBc_Bs, this->servicerInertialState.omega_BN_B, v_BsBc_Bs_cross);
+    v3Add(v_BsBc_Bs, v_BsBc_Bs_cross, this->trueRelTransState.v_BsBc_Bs);
 
-
-    m33tMultV3(dcm_BcBs, this->clientInertialState.omega_BN_B, client_omega_BN_Bs);
-    v3Subtract(client_omega_BN_Bs, this->servicerInertialState.omega_BN_B, this->trueRelAttState.omega_BcBs_Bs);
-
+    m33tMultV3(dcm_BsBc, this->clientInertialState.omega_BN_B, client_omega_BN_Bs);
+    v3Subtract(this->servicerInertialState.omega_BN_B, client_omega_BN_Bs, this->trueRelAttState.omega_BsBc_Bs);
 }
 
 /*! This method sets the propagation matrix and requests new random errors from

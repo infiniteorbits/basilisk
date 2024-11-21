@@ -1,7 +1,7 @@
 /*
  ISC License
 
- Copyright (c) 2016, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
+ Copyright (c) 2021, Autonomous Vehicle Systems Lab, University of Colorado at Boulder
 
  Permission to use, copy, modify, and/or distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -16,16 +16,27 @@
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
  */
+%module relativeGuidanceTR
+%{
+   #include "relativeGuidanceTR.h"
+%}
 
-#ifndef REL_NAV_ATT_MESSAGE_H
-#define REL_NAV_ATT_MESSAGE_H
+%pythoncode %{
+from Basilisk.architecture.swig_common_model import *
+%}
+%include "std_string.i"
+%include "swig_conly_data.i"
 
-/*! @brief Structure used to define the output definition for attitude guidance*/
-typedef struct {
-    double timeTag;          //!< [s]   Current vehicle time-tag associated with measurements*/
-    double sigma_BsBc[3];      //!<       Current client spacecraft attitude (MRPs) with respecto to servicer spacecraft */
-    double omega_BsBc_Bs[3];    //!< [r/s] Current client spacecraft angular velocity vector with respect to servicer frame in servicer B frame components
-}RelNavAttMsgPayload;
+%include "sys_model.i"
+%include "relativeGuidanceTR.h"
+
+%include "architecture/msgPayloadDefC/RelNavTransMsgPayload.h"
+%include "architecture/msgPayloadDefC/NavAttMsgPayload.h"
+%include "architecture/msgPayloadDefC/NavTransMsgPayload.h"
+%include "architecture/msgPayloadDefC/CmdForceBodyMsgPayload.h"
 
 
-#endif
+%pythoncode %{
+import sys
+protectAllClasses(sys.modules[__name__])
+%}
